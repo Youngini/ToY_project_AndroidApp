@@ -1,6 +1,11 @@
 package com.example.sample01;
 
+
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -8,6 +13,11 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+
+import com.example.sample01.DataBase.SmokeDataBaseHelper;
+import com.example.sample01.DataBase.NoSmokeDataBaseHelper;
+import com.google.android.material.snackbar.Snackbar;
 
 
 
@@ -69,10 +79,14 @@ public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
+    float val = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        getNoSmoke();
+        getSmoke();
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -91,6 +105,54 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    public void getNoSmoke() {
+
+        NoSmokeDataBaseHelper dbHelper = new NoSmokeDataBaseHelper(this);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+
+        Cursor cursor1 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID <=10000 ",null);
+        Cursor cursor2 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID BETWEEN 10001 and 20000 ",null);
+        Cursor cursor3 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID BETWEEN 20001 and 30000 ",null);
+        Cursor cursor4 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID BETWEEN 30001 and 40000 ",null);
+        Cursor cursor5 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID >=40001 ",null);
+
+
+        if (cursor1.moveToNext())
+            val = cursor1.getFloat(5);
+        if (cursor2.moveToNext())
+            val = cursor2.getFloat(5);
+        if (cursor3.moveToNext())
+            val = cursor1.getFloat(5);
+        if (cursor4.moveToNext())
+            val = cursor1.getFloat(5);
+        if (cursor5.moveToNext())
+            val = cursor1.getFloat(5);
+
+        cursor1.close();
+        cursor2.close();
+        cursor3.close();
+        cursor4.close();
+        cursor5.close();
+        dbHelper.close();
+    }
+
+    public void getSmoke(){
+        SmokeDataBaseHelper dbHelper = new SmokeDataBaseHelper(this);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM smoking_area",null);
+
+        if (cursor.moveToNext())
+            val = cursor.getFloat(9);
+
+        cursor.close();
+        dbHelper.close();
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
