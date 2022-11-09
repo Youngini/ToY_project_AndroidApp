@@ -1,26 +1,53 @@
 package com.example.sample01;
 
+
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.database.sqlite.SQLiteOpenHelper;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.widget.Toast;
 import android.os.Bundle;
+import android.util.Log;
+
+import com.example.sample01.DataBase.ChoiceDataBaseHelper;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.view.ViewGroup;
 import net.daum.mf.map.api.MapView;
+
+import com.example.sample01.DataBase.SmokeDataBaseHelper;
+import com.example.sample01.DataBase.NoSmokeDataBaseHelper;
+import com.example.sample01.DataBase.ChoiceDataBaseHelper;
+import com.google.android.material.snackbar.Snackbar;
+
 
 
 public class MainActivity extends AppCompatActivity {
 
     int nCurrentPermission = 0;
     static final int PERMISSIONS_REQUEST = 0x0000001;
+    float val1 = 0;
+    float val2 = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+
         setContentView(R.layout.activity_main);
 
         MapView mapView = new MapView(this);
@@ -29,6 +56,10 @@ public class MainActivity extends AppCompatActivity {
         mapViewContainer.addView(mapView);
 
         onCheckPermission();
+
+        getNoSmoke();
+        getSmoke();
+        getChoice();
     }
 
     public void onCheckPermission(){
@@ -49,7 +80,68 @@ public class MainActivity extends AppCompatActivity {
                         PERMISSIONS_REQUEST);
                 }
         }
+
+
+
     }
+
+
+    public void getChoice(){
+        ChoiceDataBaseHelper dbHelper = new ChoiceDataBaseHelper(this);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        dbHelper.close();
+    }
+
+
+
+
+    public void getNoSmoke() {
+
+        NoSmokeDataBaseHelper dbHelper = new NoSmokeDataBaseHelper(this);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+
+        Cursor cursor1 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID <=10000 ",null);
+        Cursor cursor2 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID BETWEEN 10001 and 20000 ",null);
+        Cursor cursor3 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID BETWEEN 20001 and 30000 ",null);
+        Cursor cursor4 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID BETWEEN 30001 and 40000 ",null);
+        Cursor cursor5 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID >=40001 ",null);
+
+
+        if (cursor1.moveToNext())
+            val1 = cursor1.getFloat(5);
+        if (cursor2.moveToNext())
+            val1 = cursor2.getFloat(5);
+        if (cursor3.moveToNext())
+            val1 = cursor3.getFloat(5);
+        if (cursor4.moveToNext())
+            val1 = cursor4.getFloat(5);
+        if (cursor5.moveToNext())
+            val1 = cursor5.getFloat(5);
+
+        cursor1.close();
+        cursor2.close();
+        cursor3.close();
+        cursor4.close();
+        cursor5.close();
+
+        dbHelper.close();
+    }
+
+
+
+    public void getSmoke(){
+        SmokeDataBaseHelper dbHelper = new SmokeDataBaseHelper(this);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM smoking_area",null);
+
+        cursor.close();
+        dbHelper.close();
+    }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
