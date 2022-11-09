@@ -13,13 +13,13 @@ public class Choice {
 
         public static final String CREATE_TABLE =
                 "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " ("
-                        +_ID + "INTEGER PRIMARY KEY,"
-                        +
+                        +_ID + " INTEGER PRIMARY KEY,"
+                        +NAME+ " TEXT,"
+                        +LATITUDE+ " REAL,"
+                        +LONGITUDE+" REAL,"
+                        +LIKE_NUM+" INTEGER);";
 
-
-
-
+        public static final String DELETE_TABLE =
+                "DROP TABLE IF EXISTS "+TABLE_NAME;
     }
-
-
 }
