@@ -1,11 +1,7 @@
 package com.example.sample01;
 
-
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.database.sqlite.SQLiteOpenHelper;
 import androidx.core.app.ActivityCompat;
@@ -151,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         }
     }
 
+    // gps 활성화 위함
     private void showDialogForLocationServiceSetting(){
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
