@@ -11,6 +11,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.LocationManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -59,7 +60,11 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
         mapViewContainer.addView(mapView);
         mapView.setMapViewEventListener(this);
-        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading);
+        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading); // 현위치 트래킹 모드
+        mapView.setCurrentLocationRadius(100); // 현위치 마커 중심으로 그릴 원의 반경 지정
+        mapView.setCurrentLocationRadiusStrokeColor(Color.RED); // 현위치 마커 중심으로 그릴 원의 선 색상 지정
+        //mapView.setCurrentLocationRadiusFillColor(Color.RED); // 현위치 마커 중심으로 그릴 원의 채우기 색상 지정
+
         if(!checkLocationServicesStatus()){
             showDialogForLocationServiceSetting();
         }
