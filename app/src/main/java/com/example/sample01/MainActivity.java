@@ -24,6 +24,8 @@ import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.SlidingDrawer;
 import android.widget.Toast;
 
@@ -40,6 +42,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Map;
 
 
@@ -56,6 +59,8 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     static final int PERMISSIONS_REQUEST = 0x0000001;
     float val1 = 0;
     float val2 = 0;
+
+    ArrayList<NoSmokingData> noSmokingDataList;
 
 
 
@@ -84,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 //        onCheckPermission();
 
 
-
+        //슬라이딩드로어 부분 밑줄저거는 호환성 문제라는데 신경안써도 된디유
         findViewById(R.id.handle).setOnClickListener(new View.OnClickListener(){
 
             @Override
@@ -95,9 +100,49 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         });
 
 
+        //리스트뷰
+        this.InitializeData();
+
+        ListView listview = (ListView) findViewById(R.id.smokingListview);
+        final ListViewAdapter listViewAdapter = new ListViewAdapter(this, noSmokingDataList);
+
+        listview.setAdapter(listViewAdapter);
+
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView parent, View v, int i, long id){
+                Toast.makeText(getApplicationContext(),
+                        listViewAdapter.getItem(i).getName(),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+
+        //데이터 불러오기 (onCreate 생명주기가 최초실행시 한번이라서 여기둠)
         getNoSmoke();
         getSmoke();
         getChoice();
+    }
+
+    public void InitializeData(){
+        noSmokingDataList = new ArrayList<NoSmokingData>();
+        //실험용데이터
+        //noSmokingDataList.add(new NoSmokingData("수현이집","대명동"));
+        //noSmokingDataList.add(new NoSmokingData("우리학교","경북대"));
+        //noSmokingDataList.add(new NoSmokingData("도깡이집","신천역"));
+
+        NoSmokeDataBaseHelper dbHelper = new NoSmokeDataBaseHelper(this);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+
+        Cursor cursor = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID <=10 ",null);
+
+        ListViewAdapter adapter = new ListViewAdapter(this,noSmokingDataList);
+
+        while(cursor.moveToNext()){
+            adapter.addItemToList(cursor.getString(0),cursor.getString(1));
+        }
+       
+
     }
 
 
