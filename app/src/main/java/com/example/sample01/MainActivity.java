@@ -1,5 +1,7 @@
 package com.example.sample01;
 
+import android.content.pm.PackageInfo;
+import android.content.pm.Signature;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -19,7 +21,10 @@ import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.provider.Settings;
+import android.util.Base64;
 import android.util.Log;
+import android.view.View;
+import android.widget.SlidingDrawer;
 import android.widget.Toast;
 
 import com.example.sample01.DataBase.ChoiceDataBaseHelper;
@@ -33,6 +38,8 @@ import com.example.sample01.DataBase.NoSmokeDataBaseHelper;
 import com.example.sample01.DataBase.ChoiceDataBaseHelper;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 
@@ -50,10 +57,13 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     float val1 = 0;
     float val2 = 0;
 
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
          // 지도 띄우기
         mapView = new MapView(this);
@@ -73,10 +83,23 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         }
 //        onCheckPermission();
 
+
+
+        findViewById(R.id.handle).setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View view) {
+                SlidingDrawer slidingDrawer = (SlidingDrawer) findViewById(R.id.slidingdrawer);
+                slidingDrawer.animateClose();
+            }
+        });
+
+
         getNoSmoke();
         getSmoke();
         getChoice();
     }
+
 
     @Override
     protected void onDestroy(){
