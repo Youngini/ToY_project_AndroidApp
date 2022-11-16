@@ -2,6 +2,7 @@ package com.example.sample01;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.Signature;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -14,6 +15,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -27,6 +29,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SlidingDrawer;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.sample01.DataBase.ChoiceDataBaseHelper;
@@ -43,10 +46,11 @@ import com.google.android.material.snackbar.Snackbar;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Map;
 
 
-public class MainActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapView.MapViewEventListener{
+public class MainActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapView.MapViewEventListener {
 
     private static final String LOG_TAG = "MAinActivity";
     private MapView mapView;
@@ -63,34 +67,31 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     ArrayList<NoSmokingData> noSmokingDataList;
 
 
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
-         // 지도 띄우기
+        // 지도 띄우기
         mapView = new MapView(this);
         mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
         mapViewContainer.addView(mapView);
         mapView.setMapViewEventListener(this);
         mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading); // 현위치 트래킹 모드
         mapView.setCurrentLocationRadius(100); // 현위치 마커 중심으로 그릴 원의 반경 지정
-        mapView.setCurrentLocationRadiusStrokeColor(Color.RED); // 현위치 마커 중심으로 그릴 원의 선 색상 지정
+        mapView.setCurrentLocationRadiusStrokeColor(Color.GRAY); // 현위치 마커 중심으로 그릴 원의 선 색상 지정
         //mapView.setCurrentLocationRadiusFillColor(Color.RED); // 현위치 마커 중심으로 그릴 원의 채우기 색상 지정
 
-        if(!checkLocationServicesStatus()){
+        if (!checkLocationServicesStatus()) {
             showDialogForLocationServiceSetting();
-        }
-        else{
+        } else {
             checkRunTimePermission();
         }
 //        onCheckPermission();
 
 
         //슬라이딩드로어 부분 밑줄저거는 호환성 문제라는데 신경안써도 된디유
-        findViewById(R.id.handle).setOnClickListener(new View.OnClickListener(){
+        findViewById(R.id.handle).setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
@@ -108,9 +109,9 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
         listview.setAdapter(listViewAdapter);
 
-        listview.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView parent, View v, int i, long id){
+            public void onItemClick(AdapterView parent, View v, int i, long id) {
                 Toast.makeText(getApplicationContext(),
                         listViewAdapter.getItem(i).getName(),
                         Toast.LENGTH_LONG).show();
@@ -121,9 +122,22 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         getNoSmoke();
         getSmoke();
         getChoice();
+
+        // 내 현재 위치로 돌아오기
+        final ImageButton currentlocation = (ImageButton) findViewById(R.id.currentlocation);
+        // 버튼 클릭 시
+        currentlocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading); // 현위치 트래킹 모드
+                mapView.setCurrentLocationRadius(100); // 현위치 마커 중심으로 그릴 원의 반경 지정
+                mapView.setCurrentLocationRadiusStrokeColor(Color.GRAY); // 현위치 마커 중심으로 그릴 원의 선 색상 지정
+                //mapView.setCurrentLocationRadiusFillColor(Color.TRANSPARENT); // 현위치 마커 중심으로 그릴 원의 채우기 색상 지정
+            }
+        });
     }
 
-    public void InitializeData(){
+    public void InitializeData() {
         noSmokingDataList = new ArrayList<NoSmokingData>();
         //실험용데이터
         //noSmokingDataList.add(new NoSmokingData("수현이집","대명동"));
@@ -134,43 +148,43 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
 
-        Cursor cursor = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID <=10 ",null);
+        Cursor cursor = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID <=10 ", null);
 
-        ListViewAdapter adapter = new ListViewAdapter(this,noSmokingDataList);
+        ListViewAdapter adapter = new ListViewAdapter(this, noSmokingDataList);
 
-        while(cursor.moveToNext()){
-            adapter.addItemToList(cursor.getString(0),cursor.getString(1));
+        while (cursor.moveToNext()) {
+            adapter.addItemToList(cursor.getString(0), cursor.getString(1));
         }
-       
+
 
     }
 
 
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         super.onDestroy();
         mapViewContainer.removeAllViews();
     }
 
     @Override
-    public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters){
+    public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters) {
         MapPoint.GeoCoordinate mapPointGeo = currentLocation.getMapPointGeoCoord();
-        Log.i(LOG_TAG, String.format("MapVie OnCurrentLocationUpdate (%f, %f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, accuracyInMeters));
+        Log.i(LOG_TAG, String.format("MapView OnCurrentLocationUpdate (%f, %f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, accuracyInMeters));
     }
 
     @Override
-    public void onCurrentLocationDeviceHeadingUpdate(MapView mapView, float v){
+    public void onCurrentLocationDeviceHeadingUpdate(MapView mapView, float v) {
     }
 
     @Override
-    public void onCurrentLocationUpdateFailed(MapView mapView){
+    public void onCurrentLocationUpdateFailed(MapView mapView) {
     }
 
     @Override
-    public void onCurrentLocationUpdateCancelled(MapView mapView){
+    public void onCurrentLocationUpdateCancelled(MapView mapView) {
     }
 
-    private void onFinishReverseGeoCoding(String result){
+    private void onFinishReverseGeoCoding(String result) {
 
     }
 
@@ -201,31 +215,29 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         }
     }
 
-    void checkRunTimePermission(){
+    void checkRunTimePermission() {
         // 런타임 퍼미션 처리
         // 1. 위치 퍼미션을 가지고 있는지 체크한다.
-        int hasFineLocationPermission = ContextCompat.checkSelfPermission(MainActivity.this,Manifest.permission.ACCESS_FINE_LOCATION);
+        int hasFineLocationPermission = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION);
 
-        if(hasFineLocationPermission == PackageManager.PERMISSION_GRANTED){
+        if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED) {
             // 2. 이미 퍼미션 가지고 있다면 위치값 못가져 옴
-        }
-        else{
-            if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, REQUIRED_PERMISSIONS[0])){
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, REQUIRED_PERMISSIONS[0])) {
                 Toast.makeText(MainActivity.this, "이 앱을 실행하려면 위치 접근 권한이 필요합니다.", Toast.LENGTH_LONG).show();
-                ActivityCompat.requestPermissions(MainActivity.this, REQUIRED_PERMISSIONS,PERMISSIONS_REQUEST_CODE);
-            }
-            else{
+                ActivityCompat.requestPermissions(MainActivity.this, REQUIRED_PERMISSIONS, PERMISSIONS_REQUEST_CODE);
+            } else {
                 ActivityCompat.requestPermissions(MainActivity.this, REQUIRED_PERMISSIONS, PERMISSIONS_REQUEST_CODE);
             }
         }
     }
 
     // gps 활성화 위함
-    private void showDialogForLocationServiceSetting(){
+    private void showDialogForLocationServiceSetting() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("위치 서비스 비활성화");
-        builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n"+"위치 설정을 수정하시겠습니까?");
+        builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n" + "위치 설정을 수정하시겠습니까?");
         builder.setCancelable(true);
         builder.setPositiveButton("설정", new DialogInterface.OnClickListener() {
             @Override
@@ -247,10 +259,10 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode){
+        switch (requestCode) {
             case GPS_ENABLE_REQUEST_CODE:
-                if(checkLocationServicesStatus()){
-                    if(checkLocationServicesStatus()){
+                if (checkLocationServicesStatus()) {
+                    if (checkLocationServicesStatus()) {
                         Log.d("@@@", "onActivityResult : GPS 활성화 되있음");
                         checkRunTimePermission();
                         return;
@@ -260,7 +272,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         }
     }
 
-    public boolean checkLocationServicesStatus(){
+    public boolean checkLocationServicesStatus() {
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
@@ -268,83 +280,56 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     }
 
     @Override
-    public void onMapViewInitialized(MapView mapView){
+    public void onMapViewInitialized(MapView mapView) {
 
     }
 
     @Override
-    public void onMapViewCenterPointMoved(MapView mapView, MapPoint mapPoint){
+    public void onMapViewCenterPointMoved(MapView mapView, MapPoint mapPoint) {
 
     }
 
     @Override
-    public void onMapViewZoomLevelChanged(MapView mapView, int i){
+    public void onMapViewZoomLevelChanged(MapView mapView, int i) {
 
     }
 
     @Override
-    public void onMapViewSingleTapped(MapView mapView, MapPoint mapPoint){
+    public void onMapViewSingleTapped(MapView mapView, MapPoint mapPoint) {
 
     }
 
     @Override
-    public void onMapViewDoubleTapped(MapView mapView, MapPoint mapPoint){
+    public void onMapViewDoubleTapped(MapView mapView, MapPoint mapPoint) {
 
     }
 
     @Override
-    public void onMapViewLongPressed(MapView mapView, MapPoint mapPoint){
+    public void onMapViewLongPressed(MapView mapView, MapPoint mapPoint) {
 
     }
 
     @Override
-    public void onMapViewDragStarted(MapView mapView, MapPoint mapPoint){
+    public void onMapViewDragStarted(MapView mapView, MapPoint mapPoint) {
 
     }
 
     @Override
-    public void onMapViewDragEnded(MapView mapView, MapPoint mapPoint){
+    public void onMapViewDragEnded(MapView mapView, MapPoint mapPoint) {
 
     }
 
     @Override
-    public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint){
+    public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
 
     }
 
-// 위치 기반 허락 과거 ver
-//    public void onCheckPermission(){
-//        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-//                || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-//
-//            if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_FINE_LOCATION)) {
-//                Toast.makeText(this, "앱 실행을 위해서는 권한을 설정해야 합니다", Toast.LENGTH_LONG).show();
-//
-//                ActivityCompat.requestPermissions(this,
-//                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-//                        PERMISSIONS_REQUEST);
-//            }
-//
-//            else{
-//                ActivityCompat.requestPermissions(this,
-//                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-//                        PERMISSIONS_REQUEST);
-//                }
-//        }
-//
-//
-//
-//    }
-
-
-    public void getChoice(){
+    public void getChoice() {
         ChoiceDataBaseHelper dbHelper = new ChoiceDataBaseHelper(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         dbHelper.close();
     }
-
-
 
 
     public void getNoSmoke() {
@@ -353,11 +338,11 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
 
-        Cursor cursor1 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID <=10000 ",null);
-        Cursor cursor2 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID BETWEEN 10001 and 20000 ",null);
-        Cursor cursor3 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID BETWEEN 20001 and 30000 ",null);
-        Cursor cursor4 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID BETWEEN 30001 and 40000 ",null);
-        Cursor cursor5 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID >=40001 ",null);
+        Cursor cursor1 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID <=10000 ", null);
+        Cursor cursor2 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID BETWEEN 10001 and 20000 ", null);
+        Cursor cursor3 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID BETWEEN 20001 and 30000 ", null);
+        Cursor cursor4 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID BETWEEN 30001 and 40000 ", null);
+        Cursor cursor5 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID >=40001 ", null);
 
 
         if (cursor1.moveToNext())
@@ -381,110 +366,13 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     }
 
 
-
-    public void getSmoke(){
+    public void getSmoke() {
         SmokeDataBaseHelper dbHelper = new SmokeDataBaseHelper(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM smoking_area",null);
+        Cursor cursor = db.rawQuery("SELECT * FROM smoking_area", null);
 
         cursor.close();
         dbHelper.close();
     }
-
-
-// 위치 기반 허락 과거 ver
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        switch (requestCode) {
-//
-//            case PERMISSIONS_REQUEST:
-//
-//                if (grantResults.length > 0
-//                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//
-//                    Toast.makeText(this, "앱 실행을 위한 권한이 설정 되엇습니다.", Toast.LENGTH_LONG).show();
-//                }
-//                else {
-//                    Toast.makeText(this, "앱 실행을 위한 권한이 취소 되었습니다.", Toast.LENGTH_LONG).show();
-//                }
-//
-//                break;
-//        }
-//    }
 }
-
-
-
-/*
-import android.os.Bundle;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.appcompat.app.AppCompatActivity;
-import android.view.View;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
-import com.example.sample01.databinding.ActivityMainBinding;
-
-import android.view.Menu;
-import android.view.MenuItem;
-
-public class MainActivity extends AppCompatActivity {
-
-    private AppBarConfiguration appBarConfiguration;
-    private ActivityMainBinding binding;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-
-        setSupportActionBar(binding.toolbar);
-
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-
-        binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, appBarConfiguration)
-                || super.onSupportNavigateUp();
-    }
-}*/
