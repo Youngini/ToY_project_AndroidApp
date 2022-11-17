@@ -50,6 +50,10 @@ import java.util.Locale;
 import java.util.Map;
 
 
+
+
+
+
 public class MainActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapView.MapViewEventListener {
 
     private static final String LOG_TAG = "MAinActivity";
@@ -63,6 +67,12 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     static final int PERMISSIONS_REQUEST = 0x0000001;
     float val1 = 0;
     float val2 = 0;
+
+    //밑에 두개가 현재위치 좌표 저장할 변수
+    double latitude =0;
+    double longitude =0;
+    Cursor location;
+
 
     ArrayList<NoSmokingData> noSmokingDataList;
 
@@ -148,12 +158,14 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
 
+
+
         Cursor cursor = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID <=10 ", null);
 
         ListViewAdapter adapter = new ListViewAdapter(this, noSmokingDataList);
 
         while (cursor.moveToNext()) {
-            adapter.addItemToList(cursor.getString(0), cursor.getString(1));
+            adapter.addItemToList(cursor.getString(1), cursor.getString(3));
         }
 
 
@@ -170,7 +182,17 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters) {
         MapPoint.GeoCoordinate mapPointGeo = currentLocation.getMapPointGeoCoord();
         Log.i(LOG_TAG, String.format("MapView OnCurrentLocationUpdate (%f, %f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, accuracyInMeters));
+        latitude = mapPointGeo.latitude; //현재위치 좌표 전역변수로 저장
+        longitude = mapPointGeo.latitude;
     }
+
+
+    //현재위치랑 가까운 점 반환
+    public void nearLocation(double x, double y){
+        //만들예정
+    }
+
+
 
     @Override
     public void onCurrentLocationDeviceHeadingUpdate(MapView mapView, float v) {
