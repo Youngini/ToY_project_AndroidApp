@@ -20,14 +20,13 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 //import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.provider.Settings;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -39,6 +38,7 @@ import android.widget.Toast;
 import com.example.sample01.DataBase.ChoiceDataBaseHelper;
 
 import android.view.ViewGroup;
+
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
@@ -57,6 +57,8 @@ import java.util.Map;
 
 
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+
 
 public class MainActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapView.MapViewEventListener {
 
@@ -73,27 +75,55 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     float val2 = 0;
 
     //밑에 두개가 현재위치 좌표 저장할 변수
-    double x = 35.88807390081719;
-    double y = 128.61130207129662;
+    double latitude = 35.88807390081719;
+    double longitude = 128.61130207129662;
     Cursor location;
 
-    // 현재 위치 찾기
-    //LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-    //Location Current;
     ArrayList<NoSmokingData> noSmokingDataList;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        // 현재 위치 찾기
+        final LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        // gps 기능 허가 확인
+        if ( Build.VERSION.SDK_INT >= 23 &&
+                ContextCompat.checkSelfPermission( getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
+            ActivityCompat.requestPermissions( MainActivity.this, new String[] {
+                    android.Manifest.permission.ACCESS_FINE_LOCATION}, 0 );
+        }
+
+        else{
+            // 가장최근 위치정보 가져오기
+            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if(location != null) {
+                longitude = location.getLongitude();
+                latitude = location.getLatitude();
+            }
+
+            // 위치정보를 원하는 시간, 거리마다 갱신해준다.
+            lm.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                    1000,
+                    1,
+                    gpsLocationListener);
+            lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+                    1000,
+                    1,
+                    gpsLocationListener);
+        }
+
         // 지도 띄우기
         mapView = new MapView(this);
         mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
         mapViewContainer.addView(mapView);
         mapView.setMapViewEventListener(this);
-        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading); // 현위치 트래킹 모드
+        MapPoint current = MapPoint.mapPointWithGeoCoord(latitude,longitude);
+        mapView.setMapCenterPoint(current,true);
+        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving); // 현위치 트래킹 모드
 
         //mapView.setCurrentLocationRadius(100); // 현위치 마커 중심으로 그릴 원의 반경 지정
         //mapView.setCurrentLocationRadiusStrokeColor(Color.GRAY); // 현위치 마커 중심으로 그릴 원의 선 색상 지정
@@ -104,8 +134,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         } else {
             checkRunTimePermission();
         }
-//        onCheckPermission();
-
 
         //슬라이딩드로어 부분 밑줄저거는 호환성 문제라는데 신경안써도 된디유
         findViewById(R.id.handle).setOnClickListener(new View.OnClickListener() {
@@ -163,19 +191,21 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
             @Override
             public void onClick(View view) {
-
+                // 한 번 클릭했을 때
                 if (System.currentTimeMillis() > delay) {
-                    // 한 번 클릭했을 때
+
                     delay = System.currentTimeMillis() + 200;
-                    mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading); // 현위치 표시
-                    //MapPoint currentPoint = mapView.getMapCenterPoint();
-                    //x = currentPoint.getMapPointGeoCoord().latitude;
-                    //y = currentPoint.getMapPointGeoCoord().longitude;
+                    // 현재위치 받아오기
+                    MapPoint current = MapPoint.mapPointWithGeoCoord(latitude,longitude);
+                    mapView.setMapCenterPoint(current,true);
+                    mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving); // 현위치 표시
                     return;
                 }
+
+                // 두 번 클릭했을 때
                 if(System.currentTimeMillis() <= delay){
-                    // 두 번 클릭했을 때
-                    mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading); // 현위치 트래킹 모드
+                    mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeadingWithoutMapMoving); // 현위치 트래킹 모드
+                    delay = 0;
                 }
 
                 //mapView.setCurrentLocationRadius(100); // 현위치 마커 중심으로 그릴 원의 반경 지정
@@ -184,6 +214,21 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
             }
         });
     }
+
+    final LocationListener gpsLocationListener = new LocationListener() {
+        public void onLocationChanged(Location location) {
+            // 위치 리스너는 위치정보를 전달할 때 호출되므로 onLocationChanged()메소드 안에 위지청보를 처리를 작업을 구현 해야합니다.
+            longitude = location.getLongitude(); // 위도
+            latitude = location.getLatitude(); // 경도
+
+        } public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        } public void onProviderEnabled(String provider) {
+
+        } public void onProviderDisabled(String provider) {
+
+        }
+    };
 
     public void InitializeData() {
         noSmokingDataList = new ArrayList<NoSmokingData>();
@@ -208,9 +253,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
             adapter.addItemToList(getLocation.getString(1), getLocation.getString(3),getLocation.getDouble(4),getLocation.getDouble(5));
         }
 
-
     }
-
 
     @Override
     protected void onDestroy() {
@@ -221,8 +264,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     @Override
     public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters) {
         MapPoint.GeoCoordinate mapPointGeo = currentLocation.getMapPointGeoCoord();
-        x = mapPointGeo.latitude; //현재위치 좌표 전역변수로 저장
-        y = mapPointGeo.latitude; //여기 실행 안됨
         Log.i(LOG_TAG, String.format("MapView OnCurrentLocationUpdate (%f, %f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, accuracyInMeters));
 //        latitude = mapPointGeo.latitude; //현재위치 좌표 전역변수로 저장
 //        longitude = mapPointGeo.latitude;
@@ -256,7 +297,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
     @Override
     public void onCurrentLocationUpdateFailed(MapView mapView) {
-        Log.i(LOG_TAG,"현재위치 가져오기 실패");
     }
 
     @Override
@@ -300,7 +340,8 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         int hasFineLocationPermission = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION);
 
         if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED) {
-            // 2. 이미 퍼미션 가지고 있다면 위치값 못가져 옴
+            // 2. 이미 퍼미션 가지고 있다면 위치값 가져 옴
+
         } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, REQUIRED_PERMISSIONS[0])) {
                 Toast.makeText(MainActivity.this, "이 앱을 실행하려면 위치 접근 권한이 필요합니다.", Toast.LENGTH_LONG).show();

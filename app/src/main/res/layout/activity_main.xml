@@ -50,14 +50,13 @@
     </SlidingDrawer>
 
     <ImageButton
-        android:id = "@+id/currentlocation"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:scaleType="fitXY"
-        android:padding="5dp"
-        android:src = "@drawable/currentlocation"
+        android:id="@+id/currentlocation"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_gravity="bottom|right"
         android:background="@android:color/transparent"
-        android:layout_gravity = "right|center"
-        />
+        android:padding="5dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/currentlocation" />
 
 </RelativeLayout>
