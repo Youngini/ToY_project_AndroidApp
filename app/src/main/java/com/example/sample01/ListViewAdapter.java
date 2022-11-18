@@ -54,10 +54,10 @@ public class ListViewAdapter extends BaseAdapter {
 
         return view;
     }
-    public void addItemToList(String name, String address){
+    public void addItemToList(String name, String address,double X,double Y){
         NoSmokingData noSmokingData = new NoSmokingData();
 
-        noSmokingData.NoSmokingData(name,address);
+        noSmokingData.NoSmokingData(name,address,X,Y);
 
         sample.add(noSmokingData);
 

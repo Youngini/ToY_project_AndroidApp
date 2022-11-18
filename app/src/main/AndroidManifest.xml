@@ -35,10 +35,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+            </intent-filter>
+
+
+
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="b0fe58ce3136a5b50418fd7be8acaf8d" />
+
+
+
         </activity>
+
+
 
     </application>
 

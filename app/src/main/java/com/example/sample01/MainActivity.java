@@ -1,9 +1,12 @@
 package com.example.sample01;
 
+import android.content.pm.PackageInfo;
+import android.content.pm.Signature;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import android.database.sqlite.SQLiteOpenHelper;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
@@ -16,12 +19,15 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 //import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.provider.Settings;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -33,14 +39,23 @@ import android.widget.Toast;
 import com.example.sample01.DataBase.ChoiceDataBaseHelper;
 
 import android.view.ViewGroup;
-
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
 import com.example.sample01.DataBase.SmokeDataBaseHelper;
 import com.example.sample01.DataBase.NoSmokeDataBaseHelper;
+import com.example.sample01.DataBase.ChoiceDataBaseHelper;
+import com.google.android.material.snackbar.Snackbar;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Map;
+
+
+
+
 
 
 public class MainActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapView.MapViewEventListener {
@@ -58,14 +73,15 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     float val2 = 0;
 
     //밑에 두개가 현재위치 좌표 저장할 변수
-    double latitude = 0.0;
-    double longitude = 0.0;
+    double x = 35.88807390081719;
+    double y = 128.61130207129662;
     Cursor location;
 
     // 현재 위치 찾기
-    LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-    Location Current;
+    //LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    //Location Current;
     ArrayList<NoSmokingData> noSmokingDataList;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +104,8 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         } else {
             checkRunTimePermission();
         }
+//        onCheckPermission();
+
 
         //슬라이딩드로어 부분 밑줄저거는 호환성 문제라는데 신경안써도 된디유
         findViewById(R.id.handle).setOnClickListener(new View.OnClickListener() {
@@ -114,13 +132,27 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                 Toast.makeText(getApplicationContext(),
                         listViewAdapter.getItem(i).getName(),
                         Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "("+x+", "+y+")",Toast.LENGTH_LONG).show();
+
+                double targetX = listViewAdapter.getItem(i).getX();
+                double targetY = listViewAdapter.getItem(i).getY();
+
+                String url = "kakaomap://route?sp=x,y&ep=targetX,targetY&by=FOOT";
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_VIEW);
+                intent.addCategory(Intent.CATEGORY_BROWSABLE);
+                intent.addCategory(Intent.CATEGORY_DEFAULT);
+                intent.setData(Uri.parse(url));
+                startActivity(intent);
+
+
             }
         });
 
         //데이터 불러오기 (onCreate 생명주기가 최초실행시 한번이라서 여기둠)
-        getNoSmoke();
-        getSmoke();
-        getChoice();
+        //getNoSmoke();
+        //getSmoke();
+        //getChoice();
 
         // gps 버튼 클릭 이벤트
         final ImageButton currentlocation = (ImageButton) findViewById(R.id.currentlocation);
@@ -136,9 +168,9 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                     // 한 번 클릭했을 때
                     delay = System.currentTimeMillis() + 200;
                     mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading); // 현위치 표시
-                    MapPoint currentPoint = mapView.getMapCenterPoint();
-                    latitude = currentPoint.getMapPointGeoCoord().latitude;
-                    longitude = currentPoint.getMapPointGeoCoord().longitude;
+                    //MapPoint currentPoint = mapView.getMapCenterPoint();
+                    //x = currentPoint.getMapPointGeoCoord().latitude;
+                    //y = currentPoint.getMapPointGeoCoord().longitude;
                     return;
                 }
                 if(System.currentTimeMillis() <= delay){
@@ -153,26 +185,32 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         });
     }
 
-
     public void InitializeData() {
         noSmokingDataList = new ArrayList<NoSmokingData>();
-        //실험용데이터
-        //noSmokingDataList.add(new NoSmokingData("수현이집","대명동"));
-        //noSmokingDataList.add(new NoSmokingData("우리학교","경북대"));
-        //noSmokingDataList.add(new NoSmokingData("도깡이집","신천역"));
 
         NoSmokeDataBaseHelper dbHelper = new NoSmokeDataBaseHelper(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID <=10 ", null);
+
+        //Cursor cursor = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID <=10 ", null);
+        String getLoc = "SELECT *,\n" +
+                "                nearLocation(x,y)\n" +
+                "        AS dist\n" +
+                "        FROM 테이블명\n" +
+                "        HAVING dist <= 200/1000";
+
+        Cursor getLocation = db.rawQuery("SELECT * FROM noSmoking_area ORDER BY (("+x+"-위도)*("+x+"-위도)) + (("+y+"-경도)*("+y+"-경도)) ASC",null);
+
 
         ListViewAdapter adapter = new ListViewAdapter(this, noSmokingDataList);
 
-        while (cursor.moveToNext()) {
-            adapter.addItemToList(cursor.getString(1), cursor.getString(3));
+        while (getLocation.moveToNext()) {
+            adapter.addItemToList(getLocation.getString(1), getLocation.getString(3),getLocation.getDouble(4),getLocation.getDouble(5));
         }
 
+
     }
+
 
     @Override
     protected void onDestroy() {
@@ -183,6 +221,8 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     @Override
     public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters) {
         MapPoint.GeoCoordinate mapPointGeo = currentLocation.getMapPointGeoCoord();
+        x = mapPointGeo.latitude; //현재위치 좌표 전역변수로 저장
+        y = mapPointGeo.latitude; //여기 실행 안됨
         Log.i(LOG_TAG, String.format("MapView OnCurrentLocationUpdate (%f, %f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, accuracyInMeters));
 //        latitude = mapPointGeo.latitude; //현재위치 좌표 전역변수로 저장
 //        longitude = mapPointGeo.latitude;
@@ -190,8 +230,22 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
 
     //현재위치랑 가까운 점 반환
-    public void nearLocation(double x, double y){
-        //만들예정
+    private String nearLocation(double latitude, double longitude){
+        double SIN_LATITUDE = Math.sin(Math.toRadians(x));
+        double COS_LATITUDE = Math.cos(Math.toRadians(x));
+        double SIN_LONGITUDE = Math.sin(Math.toRadians(y));
+        double COS_LONGITUDE = Math.cos(Math.toRadians(y));
+
+        final double sinLat = Math.sin(Math.toRadians(latitude));
+        final double cosLat = Math.cos(Math.toRadians(latitude));
+        final double sinLng = Math.sin(Math.toRadians(longitude));
+        final double cosLng = Math.cos(Math.toRadians(longitude));
+
+        return "(" + cosLat + "*" + COS_LATITUDE
+                + "*(" + COS_LONGITUDE + "*" + cosLng
+                + "+" + SIN_LONGITUDE + "*" + sinLng
+                + ")+" + sinLat + "*" + SIN_LATITUDE
+                + ")";
     }
 
 
@@ -202,6 +256,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
     @Override
     public void onCurrentLocationUpdateFailed(MapView mapView) {
+        Log.i(LOG_TAG,"현재위치 가져오기 실패");
     }
 
     @Override
@@ -245,7 +300,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         int hasFineLocationPermission = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION);
 
         if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED) {
-            // 2. 이미 퍼미션 가지고 있다면 위치값 가져 옴
+            // 2. 이미 퍼미션 가지고 있다면 위치값 못가져 옴
         } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, REQUIRED_PERMISSIONS[0])) {
                 Toast.makeText(MainActivity.this, "이 앱을 실행하려면 위치 접근 권한이 필요합니다.", Toast.LENGTH_LONG).show();

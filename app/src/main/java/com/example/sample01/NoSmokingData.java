@@ -3,10 +3,14 @@ package com.example.sample01;
 public class NoSmokingData {
     private String name;
     private String address;
+    private double X;
+    private double Y;
 
-    public void NoSmokingData(String name, String address){
+    public void NoSmokingData(String name, String address,double X, double Y){
         this.name = name;
         this.address = address;
+        this.X = X;
+        this.Y = Y;
     }
 
     public String getName(){
@@ -16,6 +20,10 @@ public class NoSmokingData {
     public String getAddress(){
         return this.address;
     }
+
+    public double getX(){return this.X;}
+
+    public double getY(){return this.Y;}
 
 
 
