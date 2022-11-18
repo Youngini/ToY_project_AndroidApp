@@ -53,10 +53,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 
-
-
-
-
 import com.google.android.gms.location.FusedLocationProviderClient;
 
 
@@ -74,9 +70,9 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     float val1 = 0;
     float val2 = 0;
 
-    //밑에 두개가 현재위치 좌표 저장할 변수
-    double latitude = 35.88807390081719;
-    double longitude = 128.61130207129662;
+    //밑에 두개가 현재위치 좌표 저장할 변수(기본값으로 경대 해뒀음!)
+    double x = 35.88807390081719;
+    double y = 128.61130207129662;
     Cursor location;
 
     ArrayList<NoSmokingData> noSmokingDataList;
@@ -101,8 +97,8 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
             // 가장최근 위치정보 가져오기
             Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if(location != null) {
-                longitude = location.getLongitude();
-                latitude = location.getLatitude();
+                y = location.getLongitude();
+                x = location.getLatitude();
             }
 
             // 위치정보를 원하는 시간, 거리마다 갱신해준다.
@@ -121,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
         mapViewContainer.addView(mapView);
         mapView.setMapViewEventListener(this);
-        MapPoint current = MapPoint.mapPointWithGeoCoord(latitude,longitude);
+        MapPoint current = MapPoint.mapPointWithGeoCoord(x,y);
         mapView.setMapCenterPoint(current,true);
         mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving); // 현위치 트래킹 모드
 
@@ -196,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
                     delay = System.currentTimeMillis() + 200;
                     // 현재위치 받아오기
-                    MapPoint current = MapPoint.mapPointWithGeoCoord(latitude,longitude);
+                    MapPoint current = MapPoint.mapPointWithGeoCoord(x,y);
                     mapView.setMapCenterPoint(current,true);
                     mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving); // 현위치 표시
                     return;
@@ -218,8 +214,8 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     final LocationListener gpsLocationListener = new LocationListener() {
         public void onLocationChanged(Location location) {
             // 위치 리스너는 위치정보를 전달할 때 호출되므로 onLocationChanged()메소드 안에 위지청보를 처리를 작업을 구현 해야합니다.
-            longitude = location.getLongitude(); // 위도
-            latitude = location.getLatitude(); // 경도
+            y = location.getLongitude(); // 위도
+            x = location.getLatitude(); // 경도
 
         } public void onStatusChanged(String provider, int status, Bundle extras) {
 
