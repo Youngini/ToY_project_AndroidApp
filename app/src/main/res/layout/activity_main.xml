@@ -10,52 +10,50 @@
     <RelativeLayout
         android:id="@+id/map_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-    <SlidingDrawer
-        android:id="@+id/slidingdrawer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:content="@+id/content"
-        android:handle="@+id/handle"
-        android:orientation="vertical" >
-
-        <Button
-            android:id="@+id/handle"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="^" />
-
-        <LinearLayout
-            android:id="@+id/content"
+        android:layout_height="match_parent">
+        <SlidingDrawer
+            android:id="@+id/slidingdrawer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#FFFFFFFF"
-            android:orientation="vertical" >
+            android:content="@+id/content"
+            android:handle="@+id/handle"
+            android:orientation="vertical">
 
-            <!--<TextView
+            <Button
+                android:id="@+id/handle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="^" />
+
+            <LinearLayout
+                android:id="@+id/content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#FFFFFFFF"
+                android:orientation="vertical">
+
+                <!--<TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="이것은 슬라이딩드로어 입니다." />-->
 
-            <ListView
-                android:id="@+id/smokingListview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                <ListView
+                    android:id="@+id/smokingListview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
-
-        </LinearLayout>
-    </SlidingDrawer>
+            </LinearLayout>
+        </SlidingDrawer>
+    </RelativeLayout>
 
     <ImageButton
-        android:id = "@+id/currentlocation"
+        android:id="@+id/currentlocation"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:scaleType="fitXY"
-        android:padding="5dp"
-        android:src = "@drawable/currentlocation"
+        android:layout_gravity="bottom|right"
         android:background="@android:color/transparent"
-        android:layout_gravity = "right|center"
-        />
+        android:padding="5dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/currentlocation" />
 
 </RelativeLayout>
