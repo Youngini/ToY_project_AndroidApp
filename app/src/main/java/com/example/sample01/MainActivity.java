@@ -158,10 +158,10 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                         Toast.LENGTH_LONG).show();
                 Toast.makeText(MainActivity.this, "("+x+", "+y+")",Toast.LENGTH_LONG).show();
 
-                double targetX = listViewAdapter.getItem(i).getX();
-                double targetY = listViewAdapter.getItem(i).getY();
+                String targetX = Double.toString(listViewAdapter.getItem(i).getX());
+                String targetY = Double.toString(listViewAdapter.getItem(i).getY());
 
-                String url = "kakaomap://route?sp=x,y&ep=targetX,targetY&by=FOOT";
+                String url = "kakaomap://route?sp=x,y&ep=" + targetX + ","+targetY+"&by=FOOT";
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
                 intent.addCategory(Intent.CATEGORY_BROWSABLE);
@@ -210,6 +210,17 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
             }
         });
     }
+
+
+    //다음페이지(사용자 신청)로 넘어가는 함수
+    public void nextPage(View view){
+        Intent intent = new Intent(this, UserChoiceActivity.class);
+        startActivity(intent);
+        //밑에 깔려있는 액티비티 삭재
+        //finish()
+    }
+
+
 
     final LocationListener gpsLocationListener = new LocationListener() {
         public void onLocationChanged(Location location) {
