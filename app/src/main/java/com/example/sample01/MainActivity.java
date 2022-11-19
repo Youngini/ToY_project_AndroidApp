@@ -97,6 +97,10 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     PlacesClient placesClient;
     MapPOIItem marker = new MapPOIItem();
 
+    // 구글 장소 검색 자동 완성
+    PlacesClient placesClient;
+    MapPOIItem marker = new MapPOIItem();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
