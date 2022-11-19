@@ -44,8 +44,8 @@ public class UserChoiceActivity extends AppCompatActivity {
     Spinner SmallSpinner;
 
     //행정구역 중심좌표 담을 전역변수
-    double x;
-    double y;
+    double x = 37.5642135;
+    double y = 127.0016958;
 
     // 지도 띄울떄 사용 할 변수
     private static final String LOG_TAG = "UserChoiceActivity";
@@ -197,6 +197,8 @@ public class UserChoiceActivity extends AppCompatActivity {
                 Toast.makeText(UserChoiceActivity.this, "( "+x_coordinate.get(i).toString()+", "+y_coordinate.get(i).toString()+")" , Toast.LENGTH_LONG).show();
                 x = (double) x_coordinate.get(i);
                 y = (double) y_coordinate.get(i);
+                MapPoint wantPoint = MapPoint.mapPointWithGeoCoord(x,y);
+                mapView.setMapCenterPoint(wantPoint,true);
             }
 
             @Override
