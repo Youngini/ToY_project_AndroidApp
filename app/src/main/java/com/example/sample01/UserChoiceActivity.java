@@ -1,18 +1,33 @@
 package com.example.sample01;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
+import android.os.Bundle;
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.LinearLayoutCompat;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
+import android.util.Log;
+import android.view.ViewGroup;
+import android.widget.Toast;
+import net.daum.mf.map.api.MapPoint;
+import net.daum.mf.map.api.MapView;
+
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Bundle;
 import android.view.View;
+
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.sample01.DataBase.KoreaGPSDataBaseHelper;
-import com.example.sample01.DataBase.NoSmokeDataBaseHelper;
 
 import java.util.ArrayList;
 
@@ -23,6 +38,7 @@ public class UserChoiceActivity extends AppCompatActivity {
     ArrayList x_coordinate;
     ArrayList y_coordinate;
 
+    LinearLayoutCompat Content;
     Spinner BigSpinner;
     Spinner MiddleSpinner;
     Spinner SmallSpinner;
@@ -31,16 +47,22 @@ public class UserChoiceActivity extends AppCompatActivity {
     double x;
     double y;
 
+    // 지도 띄울떄 사용 할 변수
+    private static final String LOG_TAG = "UserChoiceActivity";
+    private MapView mapView;
+    private ViewGroup mapViewContainer;
+    private static final int GPS_ENABLE_REQUEST_CODE = 2001;
+    private static final int PERMISSIONS_REQUEST_CODE = 100;
+    String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION};
 
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savdeInstanceState) {
         super.onCreate(savdeInstanceState);
         setContentView(R.layout.activity_userchoice);
 
-
-
-
+        Content = (LinearLayoutCompat)findViewById(R.id.content);
         BigSpinner = (Spinner)findViewById(R.id.big_spinner);
         MiddleSpinner = (Spinner)findViewById(R.id.middle_spinner);
         SmallSpinner = (Spinner)findViewById(R.id.small_spinner);
@@ -49,13 +71,18 @@ public class UserChoiceActivity extends AppCompatActivity {
         MiddleSpinner.setPrompt("시군구");
         SmallSpinner.setPrompt("읍면동");
 
-
+        Content.bringToFront();
+        BigSpinner.bringToFront();
+        MiddleSpinner.bringToFront();
+        SmallSpinner.bringToFront();
 
         InitializeBig();
 
-
-
-
+        mapView = new MapView(this);
+        mapViewContainer = (ViewGroup) findViewById(R.id.map_view2);
+        mapViewContainer.addView(mapView);
+        MapPoint wantPoint = MapPoint.mapPointWithGeoCoord(x,y);
+        mapView.setMapCenterPoint(wantPoint,true);
 
     }
 
@@ -87,15 +114,11 @@ public class UserChoiceActivity extends AppCompatActivity {
                 InitializeMiddle(bigList.get(i).toString());
             }
 
-
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
 
             }
         });
-
-
-
 
     }
 
@@ -167,12 +190,10 @@ public class UserChoiceActivity extends AppCompatActivity {
         adapter3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         SmallSpinner.setAdapter(adapter3);
 
-
         SmallSpinner.setSelection(0,false);
         SmallSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                //Toast.makeText(UserChoiceActivity.this, smallList.get(i).toString() , Toast.LENGTH_LONG).show();
                 Toast.makeText(UserChoiceActivity.this, "( "+x_coordinate.get(i).toString()+", "+y_coordinate.get(i).toString()+")" , Toast.LENGTH_LONG).show();
                 x = (double) x_coordinate.get(i);
                 y = (double) y_coordinate.get(i);
@@ -188,3 +209,4 @@ public class UserChoiceActivity extends AppCompatActivity {
     }
 
 }
+
