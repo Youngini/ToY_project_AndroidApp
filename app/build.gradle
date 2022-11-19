@@ -41,10 +41,14 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.5.3'
     implementation fileTree(dir: 'C:\\GIT\\2022_SmokingBooth_AndroidApp\\app\\src\\main\\jniLibs', include: ['*.aar', '*.jar'], exclude: [])
     implementation 'com.google.android.gms:play-services-location:21.0.1'
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.google.android.libraries.places:places:2.7.0'
+
     implementation files('libs/libDaumMapAndroid.jar')
 
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.14.9'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'

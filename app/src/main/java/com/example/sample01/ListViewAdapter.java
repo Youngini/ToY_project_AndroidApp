@@ -8,6 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.example.sample01.DataBase.NoSmokingData;
+import com.example.sample01.DataBase.SmokingData;
 
 import java.util.ArrayList;
 
@@ -16,9 +17,9 @@ public class ListViewAdapter extends BaseAdapter {
 
     Context mContext = null;
     LayoutInflater mLayoutInflater = null;
-    ArrayList<NoSmokingData> sample;
+    ArrayList<SmokingData> sample;
 
-    public ListViewAdapter(Context context, ArrayList<NoSmokingData> data){
+    public ListViewAdapter(Context context, ArrayList<SmokingData> data){
         mContext = context;
         sample = data;
         mLayoutInflater = LayoutInflater.from(mContext);
@@ -32,7 +33,7 @@ public class ListViewAdapter extends BaseAdapter {
     }
 
     @Override
-    public NoSmokingData getItem(int i) {
+    public SmokingData getItem(int i) {
         return sample.get(i);
     }
 
@@ -55,11 +56,11 @@ public class ListViewAdapter extends BaseAdapter {
         return view;
     }
     public void addItemToList(String name, String address,double X,double Y){
-        NoSmokingData noSmokingData = new NoSmokingData();
+        SmokingData smokingData = new SmokingData();
 
-        noSmokingData.NoSmokingData(name,address,X,Y);
+        smokingData.SmokingData(name,address,X,Y);
 
-        sample.add(noSmokingData);
+        sample.add(smokingData);
 
 
     }

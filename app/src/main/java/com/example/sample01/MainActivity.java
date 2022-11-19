@@ -1,5 +1,9 @@
 package com.example.sample01;
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
+import android.content.pm.PackageInfo;
+import android.content.pm.Signature;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -16,6 +20,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 //import android.location.Location;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -23,9 +28,12 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.text.Layout;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SlidingDrawer;
 import android.widget.ImageButton;
@@ -35,14 +43,30 @@ import com.example.sample01.DataBase.ChoiceDataBaseHelper;
 
 import android.view.ViewGroup;
 
+import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
 import com.example.sample01.DataBase.NoSmokingData;
+import com.example.sample01.DataBase.SmokingData;
 import com.example.sample01.DataBase.SmokeDataBaseHelper;
 import com.example.sample01.DataBase.NoSmokeDataBaseHelper;
+import com.example.sample01.DataBase.ChoiceDataBaseHelper;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Map;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
 
 
 public class MainActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapView.MapViewEventListener {
@@ -65,21 +89,70 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     Cursor location;
 
     ArrayList<NoSmokingData> noSmokingDataList;
+    ArrayList<SmokingData> smokingDataList;
+    ArrayList smokingMarkerX;
+    ArrayList smokingMarkerY;
+
+    // 구글 장소 검색 자동 완성
+    PlacesClient placesClient;
+    MapPOIItem marker = new MapPOIItem();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
+
+        // 구글 장소 검색 자동 완성
+        String Apikey = "AIzaSyBa8koUZ6pzntQGN0AaL884n-llNZZym8U";
+
+        if(!Places.isInitialized()){
+            Places.initialize(getApplicationContext(),Apikey);
+
+        }
+
+        placesClient = Places.createClient(this);
+
+        final AutocompleteSupportFragment autocompleteSupportFragment =
+                (AutocompleteSupportFragment) getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        autocompleteSupportFragment.setPlaceFields(Arrays.asList(Place.Field.ID,Place.Field.LAT_LNG,Place.Field.NAME));
+
+        autocompleteSupportFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onError(@NonNull Status status) {
+
+            }
+
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+                final LatLng latLng = place.getLatLng();
+
+                Log.i(TAG, "onPlaceSelected : "+latLng.latitude+"\n"+latLng.longitude);
+
+                MapPoint search = MapPoint.mapPointWithGeoCoord(latLng.latitude,latLng.longitude);
+                mapView.setMapCenterPoint(search,true);
+                mapView.setZoomLevel(2,true);
+                mapView.removePOIItem(marker);
+                marker.setItemName(place.getName());
+                marker.setTag(0);
+                marker.setMapPoint(search);
+                marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
+                marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
+
+                mapView.addPOIItem(marker);
+
+            }
+        });
+
 
         // 현재 위치 찾기
         final LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         // gps 기능 허가 확인
         if ( Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission( getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
+                ContextCompat.checkSelfPermission( getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
             ActivityCompat.requestPermissions( MainActivity.this, new String[] {
-                    android.Manifest.permission.ACCESS_FINE_LOCATION}, 0 );
+                    Manifest.permission.ACCESS_FINE_LOCATION}, 0 );
         }
 
         else{
@@ -135,10 +208,11 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         this.InitializeData();
 
         ListView listview = (ListView) findViewById(R.id.smokingListview);
-        final ListViewAdapter listViewAdapter = new ListViewAdapter(this, noSmokingDataList);
+        final ListViewAdapter listViewAdapter = new ListViewAdapter(this, smokingDataList);
 
         listview.setAdapter(listViewAdapter);
 
+        //경로찾기 연결
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView parent, View v, int i, long id) {
@@ -162,13 +236,10 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
             }
         });
 
-        //데이터 불러오기 (onCreate 생명주기가 최초실행시 한번이라서 여기둠)
-        //getNoSmoke();
-        //getSmoke();
-        //getChoice();
 
         // gps 버튼 클릭 이벤트
         final ImageButton currentlocation = (ImageButton) findViewById(R.id.currentlocation);
+        currentlocation.bringToFront();
         // 버튼 클릭 시
         currentlocation.setOnClickListener(new View.OnClickListener() {
 
@@ -184,12 +255,14 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                     MapPoint current = MapPoint.mapPointWithGeoCoord(x,y);
                     mapView.setMapCenterPoint(current,true);
                     mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving); // 현위치 표시
+                    mapView.setZoomLevel(2,true);
                     return;
                 }
 
                 // 두 번 클릭했을 때
                 if(System.currentTimeMillis() <= delay){
                     mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeadingWithoutMapMoving); // 현위치 트래킹 모드
+                    mapView.setZoomLevel(2,true);
                     delay = 0;
                 }
 
@@ -198,6 +271,12 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                 //mapView.setCurrentLocationRadiusFillColor(Color.TRANSPARENT); // 현위치 마커 중심으로 그릴 원의 채우기 색상 지정
             }
         });
+
+        // 검색창
+        final LinearLayout search_content = (LinearLayout) findViewById(R.id.search_content);
+        search_content.bringToFront();
+//        final EditText search_engine =  (EditText) findViewById(R.id.search_engine);
+//        search_engine.bringToFront();
     }
 
 
@@ -227,26 +306,22 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     };
 
     public void InitializeData() {
-        noSmokingDataList = new ArrayList<NoSmokingData>();
-
-        NoSmokeDataBaseHelper dbHelper = new NoSmokeDataBaseHelper(this);
+        int cnt=0;
+        smokingDataList = new ArrayList<SmokingData>();
+        SmokeDataBaseHelper dbHelper = new SmokeDataBaseHelper(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
+        Cursor getLocation = db.rawQuery("SELECT * FROM smoking_area ORDER BY (("+x+"-위도)*("+x+"-위도)) + (("+y+"-경도)*("+y+"-경도)) ASC",null);
 
-        //Cursor cursor = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID <=10 ", null);
-        String getLoc = "SELECT *,\n" +
-                "                nearLocation(x,y)\n" +
-                "        AS dist\n" +
-                "        FROM 테이블명\n" +
-                "        HAVING dist <= 200/1000";
-
-        Cursor getLocation = db.rawQuery("SELECT * FROM noSmoking_area ORDER BY (("+x+"-위도)*("+x+"-위도)) + (("+y+"-경도)*("+y+"-경도)) ASC",null);
-
-
-        ListViewAdapter adapter = new ListViewAdapter(this, noSmokingDataList);
+        ListViewAdapter adapter = new ListViewAdapter(this, smokingDataList);
 
         while (getLocation.moveToNext()) {
-            adapter.addItemToList(getLocation.getString(1), getLocation.getString(3),getLocation.getDouble(4),getLocation.getDouble(5));
+            adapter.addItemToList(getLocation.getString(1), getLocation.getString(2),getLocation.getDouble(3),getLocation.getDouble(4));
+            while(cnt<=10){
+                smokingMarkerX.add(getLocation.getDouble(3));
+                smokingMarkerY.add(getLocation.getDouble(4));
+                cnt++;
+            }
         }
 
     }
