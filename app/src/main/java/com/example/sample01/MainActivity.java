@@ -97,9 +97,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     PlacesClient placesClient;
     MapPOIItem marker = new MapPOIItem();
 
-    // 구글 장소 검색 자동 완성
-    PlacesClient placesClient;
-    MapPOIItem marker = new MapPOIItem();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,6 +141,8 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                 marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
 
                 mapView.addPOIItem(marker);
+
+
 
             }
         });
@@ -241,6 +240,24 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         });
 
 
+
+
+
+        ArrayList<MapPOIItem> markerArr = new ArrayList<MapPOIItem>();
+        for(int i=0;i<=10;i++){
+            MapPoint mapPoints = MapPoint.mapPointWithGeoCoord((Double) smokingMarkerX.get(i), (Double) smokingMarkerY.get(i));
+            MapPOIItem markers = new MapPOIItem();
+            markers.setMapPoint(mapPoints);
+            //markers.setMarkerType(MapPOIItem.MarkerType.BluePin);
+            //mapView.addPOIItem(markers);
+            markerArr.add(markers);
+        }
+        mapView.addPOIItems(markerArr.toArray(new MapPOIItem[markerArr.size()]));
+
+
+
+
+
         // gps 버튼 클릭 이벤트
         final ImageButton currentlocation = (ImageButton) findViewById(R.id.currentlocation);
         currentlocation.bringToFront();
@@ -312,6 +329,8 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     public void InitializeData() {
         int cnt=0;
         smokingDataList = new ArrayList<SmokingData>();
+        smokingMarkerX = new ArrayList<>();
+        smokingMarkerY = new ArrayList<>();
         SmokeDataBaseHelper dbHelper = new SmokeDataBaseHelper(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 

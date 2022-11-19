@@ -61,41 +61,7 @@
         android:scaleType="fitXY"
         android:src="@drawable/currentlocation" />
 
-    <!-- 검색창-->
-    <LinearLayout
-        android:id="@+id/search_content"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="20dp"
-        android:background="@color/white"
-        android:orientation="horizontal">
 
-        <fragment
-            android:id = "@+id/autocomplete_fragment"
-            android:name = 'com.google.android.libraries.places.widget.AutocompleteSupportFragment'
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <!--        <EditText-->
-        <!--            android:text="검색할 장소를 입력 후 선택해주세요"-->
-        <!--            android:id="@+id/search_engine"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:backgroundTint="@color/black"-->
-        <!--            />-->
-
-        <!--        <ListView-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="match_parent"-->
-        <!--            android:divider="#999999"-->
-        <!--            android:dividerHeight="1dp">-->
-
-        <!--        </ListView>-->
-
-    </LinearLayout>
 
     <Button
         android:layout_marginTop="70dp"
@@ -104,8 +70,25 @@
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="5dp"
         android:onClick="nextPage"
-        android:text="흡연구역 신청 >"
+        android:text="흡연구역 신청 >" />
 
-        />
+    <LinearLayout
+        android:id="@+id/search_content"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:background="@color/white">
+
+        <fragment
+            android:id = "@+id/autocomplete_fragment"
+            android:name = 'com.google.android.libraries.places.widget.AutocompleteSupportFragment'
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
 
 </RelativeLayout>
