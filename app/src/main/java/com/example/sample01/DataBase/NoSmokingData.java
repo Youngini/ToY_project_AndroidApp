@@ -1,4 +1,4 @@
-package com.example.sample01;
+package com.example.sample01.DataBase;
 
 public class NoSmokingData {
     private String name;

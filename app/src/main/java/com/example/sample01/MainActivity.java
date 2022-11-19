@@ -1,12 +1,9 @@
 package com.example.sample01;
 
-import android.content.pm.PackageInfo;
-import android.content.pm.Signature;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import android.database.sqlite.SQLiteOpenHelper;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
@@ -14,7 +11,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -42,18 +38,11 @@ import android.view.ViewGroup;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
+import com.example.sample01.DataBase.NoSmokingData;
 import com.example.sample01.DataBase.SmokeDataBaseHelper;
 import com.example.sample01.DataBase.NoSmokeDataBaseHelper;
-import com.example.sample01.DataBase.ChoiceDataBaseHelper;
-import com.google.android.material.snackbar.Snackbar;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Map;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
 
 
 public class MainActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapView.MapViewEventListener {
@@ -216,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     public void nextPage(View view){
         Intent intent = new Intent(this, UserChoiceActivity.class);
         startActivity(intent);
-        //밑에 깔려있는 액티비티 삭재
+        //밑에 깔려있는 액티비티 삭제
         //finish()
     }
 
