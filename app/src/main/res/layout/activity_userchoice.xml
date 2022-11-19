@@ -9,10 +9,10 @@
     tools:context=".UserChoiceActivity">
 
     <RelativeLayout
+        android:id="@+id/map_view2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/map_view2"
-        ></RelativeLayout>
+        android:layout_marginTop="30dp"></RelativeLayout>
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/content"
