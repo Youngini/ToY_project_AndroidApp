@@ -13,7 +13,10 @@ import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Handler;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import net.daum.mf.map.api.MapPoint;
@@ -39,9 +42,11 @@ public class UserChoiceActivity extends AppCompatActivity {
     ArrayList y_coordinate;
 
     LinearLayoutCompat Content;
-    Spinner BigSpinner;
-    Spinner MiddleSpinner;
-    Spinner SmallSpinner;
+    public Spinner BigSpinner;
+    public Spinner MiddleSpinner;
+    public Spinner SmallSpinner;
+
+    int check = 0;
 
     //행정구역 중심좌표 담을 전역변수
     double x = 37.5642135;
@@ -78,11 +83,15 @@ public class UserChoiceActivity extends AppCompatActivity {
 
         InitializeBig();
 
+
+
         mapView = new MapView(this);
         mapViewContainer = (ViewGroup) findViewById(R.id.map_view2);
         mapViewContainer.addView(mapView);
         MapPoint wantPoint = MapPoint.mapPointWithGeoCoord(x,y);
         mapView.setMapCenterPoint(wantPoint,true);
+
+
 
     }
 
@@ -107,6 +116,8 @@ public class UserChoiceActivity extends AppCompatActivity {
         BigSpinner.setAdapter(adapter1);
 
         BigSpinner.setSelection(0,false);
+
+
         BigSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -209,6 +220,8 @@ public class UserChoiceActivity extends AppCompatActivity {
 
 
     }
+
+
 
 }
 
