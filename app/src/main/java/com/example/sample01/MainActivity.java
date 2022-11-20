@@ -102,6 +102,22 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // 지도 띄우기
+        mapView = new MapView(this);
+        mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
+        mapViewContainer.addView(mapView);
+        mapView.setMapViewEventListener(this);
+        MapPoint current = MapPoint.mapPointWithGeoCoord(x,y);
+        mapView.setMapCenterPoint(current,true);
+        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving); // 현위치 트래킹 모드
+
+        if (!checkLocationServicesStatus()) {
+            showDialogForLocationServiceSetting();
+        } else {
+            checkRunTimePermission();
+        }
+
+
         // 구글 장소 검색 자동 완성
         String Apikey = "AIzaSyBa8koUZ6pzntQGN0AaL884n-llNZZym8U";
 
@@ -151,11 +167,8 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                     mapView.addPOIItem(markers);
                 }
 
-
-
             }
         });
-
 
         // 현재 위치 찾기
         final LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -184,22 +197,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                     1000,
                     1,
                     gpsLocationListener);
-        }
-
-        // 지도 띄우기
-        mapView = new MapView(this);
-        mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
-        mapViewContainer.addView(mapView);
-        mapView.setMapViewEventListener(this);
-        MapPoint current = MapPoint.mapPointWithGeoCoord(x,y);
-        mapView.setMapCenterPoint(current,true);
-        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving); // 현위치 트래킹 모드
-
-
-        if (!checkLocationServicesStatus()) {
-            showDialogForLocationServiceSetting();
-        } else {
-            checkRunTimePermission();
         }
 
         //슬라이딩드로어 부분 밑줄저거는 호환성 문제라는데 신경안써도 된디유
@@ -245,26 +242,21 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
             }
         });
 
-
-
-
         //마커 여러개 띄우기
         ArrayList<MapPOIItem> markerArr = new ArrayList<MapPOIItem>();
 
         for(int i=0;i<10;i++){
             MapPoint mapPoints = MapPoint.mapPointWithGeoCoord((double)smokingMarkerX.get(i), (double)smokingMarkerY.get(i));
+            markers.setItemName("Default Marker");
+            markers.setTag(0);
             markers.setMapPoint(mapPoints);
-            markers.setMarkerType(MapPOIItem.MarkerType.RedPin);
+            markers.setMarkerType(MapPOIItem.MarkerType.RedPin); // 기본으로 제공하는 BluePin 마커 모양.
+            mapView.addPOIItem(markers);
             //mapView.addPOIItem(markers);
             //markerArr.add(markers);
-            mapView.addPOIItem(markers);
         }
         //mapView.addPOIItems(markerArr.toArray(new MapPOIItem[markerArr.size()]));
         //mapView.addPOIItems(markerArr);
-
-
-
-
 
         // gps 버튼 클릭 이벤트
         final ImageButton currentlocation = (ImageButton) findViewById(R.id.currentlocation);
