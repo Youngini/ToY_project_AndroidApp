@@ -46,7 +46,6 @@
         android:onClick="previousPage"
         android:text = "@string/btn2_name"
         >
-
     </Button>
 
 </RelativeLayout>

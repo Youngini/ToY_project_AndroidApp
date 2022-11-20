@@ -1,12 +1,17 @@
 package com.example.sample01;
 
+import static com.example.sample01.R.id.edittextAddress;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.LocationManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -17,9 +22,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Handler;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import net.daum.mf.map.api.MapCircle;
@@ -41,7 +49,10 @@ import com.example.sample01.DataBase.NoSmokingData;
 import com.example.sample01.DataBase.SmokeDataBaseHelper;
 import com.example.sample01.DataBase.SmokingData;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class UserChoiceActivity extends AppCompatActivity implements MapView.MapViewEventListener, MapView.POIItemEventListener, View.OnClickListener, MapView.CurrentLocationEventListener {
     ArrayList bigList;
@@ -424,7 +435,34 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
     // 마커 선택하면 띄우기
     @Override
     public void onPOIItemSelected(MapView mapView, MapPOIItem mapPOIItem) {
+        Context context = getBaseContext();
+        String address = getAddress(context,selectX,selectY);
+        AlertDialog.Builder newsmokingArea = new AlertDialog.Builder(UserChoiceActivity.this);
+        LayoutInflater inflater = getLayoutInflater();
+        View view = inflater.inflate(R.layout.application,null);
+        newsmokingArea.setView(view);
 
+        final TextView Address = (TextView) view.findViewById(R.id.edittextAddress);
+        final EditText reason = (EditText) view.findViewById(R.id.edittextreason);
+
+        Address.setText(address);
+        // 신청 버튼
+        newsmokingArea.setPositiveButton("신청", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+
+        // 취소 버튼
+        newsmokingArea.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+
+        newsmokingArea.show();
     }
 
     @Override
@@ -441,5 +479,32 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
     public void onDraggablePOIItemMoved(MapView mapView, MapPOIItem mapPOIItem, MapPoint mapPoint) {
 
     }
+
+    public static String getAddress(Context mContext,double lat, double lng) {
+        String nowAddress ="현재 위치를 확인 할 수 없습니다.";
+        Geocoder geocoder = new Geocoder(mContext, Locale.KOREA);
+        List<Address> address;
+        try {
+            if (geocoder != null) {
+                //세번째 파라미터는 좌표에 대해 주소를 리턴 받는 갯수로
+                //한좌표에 대해 두개이상의 이름이 존재할수있기에 주소배열을 리턴받기 위해 최대갯수 설정
+                address = geocoder.getFromLocation(lat, lng, 1);
+
+                if (address != null && address.size() > 0) {
+                    // 주소 받아오기
+                    String currentLocationAddress = address.get(0).getAddressLine(0).toString();
+                    nowAddress  = currentLocationAddress;
+
+                }
+            }
+
+        } catch (IOException e) {
+            Toast.makeText(mContext, "주소를 가져 올 수 없습니다.", Toast.LENGTH_LONG).show();
+
+            e.printStackTrace();
+        }
+        return nowAddress;
+    }
+
 }
 
