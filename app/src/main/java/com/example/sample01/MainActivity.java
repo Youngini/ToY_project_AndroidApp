@@ -100,7 +100,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     MapPOIItem marker = new MapPOIItem();
     MapPOIItem markers = new MapPOIItem();
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
