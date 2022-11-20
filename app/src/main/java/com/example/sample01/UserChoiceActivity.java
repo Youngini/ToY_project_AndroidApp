@@ -178,7 +178,7 @@ public class UserChoiceActivity extends AppCompatActivity {
         SmokeDataBaseHelper dataBaseHelper = new SmokeDataBaseHelper(this);
         SQLiteDatabase db = dataBaseHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM smoking_area",null);
+        Cursor cursor = db.rawQuery("SELECT * FROM smoking_area ",null);
 
         while(cursor.moveToNext()) {
             x = cursor.getDouble(3);
@@ -193,23 +193,26 @@ public class UserChoiceActivity extends AppCompatActivity {
         nosmokingX = new ArrayList<>();
         nosmokingY = new ArrayList<>();
         nosmokingArea = new ArrayList<>();
-        double x;
-        double y;
+        double xx;
+        double yy;
         double area;
 
         NoSmokeDataBaseHelper dataBaseHelper = new NoSmokeDataBaseHelper(this);
         SQLiteDatabase db = dataBaseHelper.getReadableDatabase();
-
-        Cursor cursor = db.rawQuery("SELECT * FROM noSmoking_area",null);
+        Cursor cursor = null;
+        cursor = db.rawQuery("SELECT * FROM noSmoking_area ORDER BY (("+x+"-위도)*("+x+"-위도)) + (("+y+"-경도)*("+y+"-경도)) ASC",null);
 
         while(cursor.moveToNext()) {
-            x = cursor.getDouble(4);
-            y = cursor.getDouble(5);
+            xx = cursor.getDouble(4);
+            yy = cursor.getDouble(5);
             area = cursor.getDouble(2);
-            nosmokingX.add(x);
-            nosmokingY.add(y);
+            nosmokingX.add(xx);
+            nosmokingY.add(yy);
             nosmokingArea.add(area);
         }
+
+        cursor.close();
+        dataBaseHelper.close();
     }
 
     public void InitializeBig(){
@@ -310,6 +313,8 @@ public class UserChoiceActivity extends AppCompatActivity {
             x_coordinate.add(x_lat);
             y_coordinate.add(y_long);
 
+            //Toast.makeText(UserChoiceActivity.this,"("+x+","+y+")", Toast.LENGTH_LONG).show();
+
         }
 
         ArrayAdapter<String> adapter3 = new ArrayAdapter(this, android.R.layout.simple_spinner_item, smallList);
@@ -326,6 +331,8 @@ public class UserChoiceActivity extends AppCompatActivity {
                 MapPoint wantPoint = MapPoint.mapPointWithGeoCoord(x,y);
                 mapView.setMapCenterPoint(wantPoint,true);
                 mapView.setZoomLevel(3,true);
+
+                getNoSmokingData();
             }
 
             @Override
