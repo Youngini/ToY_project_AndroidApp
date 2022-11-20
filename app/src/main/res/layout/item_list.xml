@@ -41,6 +41,7 @@
         android:layout_marginTop="10dp">
 
         <TextView
+            android:id="@+id/dist"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="36m"

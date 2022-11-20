@@ -48,7 +48,7 @@ public class ListViewAdapter extends BaseAdapter {
 
         TextView Name = (TextView) view.findViewById(R.id.nosmokingName);
         TextView Address = (TextView)view.findViewById(R.id.nosmokingAddress);
-
+        //TextView dist = (TextView)view.findViewById(R.id.dist);
         Name.setText(sample.get(i).getName());
         Address.setText(sample.get(i).getAddress());
 

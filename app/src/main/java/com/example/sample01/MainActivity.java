@@ -37,6 +37,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SlidingDrawer;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.sample01.DataBase.ChoiceDataBaseHelper;
@@ -80,16 +81,16 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
     int nCurrentPermission = 0;
     static final int PERMISSIONS_REQUEST = 0x0000001;
-    float val1 = 0;
+
 
     //밑에 두개가 현재위치 좌표 저장할 변수(기본값으로 경대 해뒀음!)
     double x = 35.88807390081719;
     double y = 128.61130207129662;
 
-    ArrayList<NoSmokingData> noSmokingDataList;
     ArrayList<SmokingData> smokingDataList;
     ArrayList smokingMarkerX;
     ArrayList smokingMarkerY;
+    ArrayList somkingMarkerName;
 
     // 구글 장소 검색 자동 완성
     PlacesClient placesClient;
@@ -304,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         startActivity(intent);
         onDestroy(); // 맵 뷰 2개 못띄워서
         //밑에 깔려있는 액티비티 삭제
-        finish();
+        //finish();
     }
 
 
@@ -326,9 +327,12 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
     public void InitializeData() {
         int cnt=0;
+
+        double distance = 0.0;
         smokingDataList = new ArrayList<SmokingData>();
         smokingMarkerX = new ArrayList<>();
         smokingMarkerY = new ArrayList<>();
+        somkingMarkerName = new ArrayList<>();
         SmokeDataBaseHelper dbHelper = new SmokeDataBaseHelper(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
@@ -336,11 +340,13 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
         ListViewAdapter adapter = new ListViewAdapter(this, smokingDataList);
 
+
         while (getLocation.moveToNext()) {
             adapter.addItemToList(getLocation.getString(1), getLocation.getString(2),getLocation.getDouble(3),getLocation.getDouble(4));
-
+            somkingMarkerName.add(getLocation.getString(1));
             smokingMarkerX.add(getLocation.getDouble(3));
             smokingMarkerY.add(getLocation.getDouble(4));
+            distance = Math.sqrt((x-getLocation.getDouble(3))*(x-getLocation.getDouble(3)) + (y-getLocation.getDouble(4))*(y-getLocation.getDouble(4)));
 
         }
 
@@ -534,55 +540,5 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
     }
 
-    public void getChoice() {
-        ChoiceDataBaseHelper dbHelper = new ChoiceDataBaseHelper(this);
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        dbHelper.close();
-    }
-
-
-    public void getNoSmoke() {
-
-        NoSmokeDataBaseHelper dbHelper = new NoSmokeDataBaseHelper(this);
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-
-
-        Cursor cursor1 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID <=10000 ", null);
-        Cursor cursor2 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID BETWEEN 10001 and 20000 ", null);
-        Cursor cursor3 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID BETWEEN 20001 and 30000 ", null);
-        Cursor cursor4 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID BETWEEN 30001 and 40000 ", null);
-        Cursor cursor5 = db.rawQuery("SELECT * FROM noSmoking_area where COUNT_ID >=40001 ", null);
-
-
-        if (cursor1.moveToNext())
-            val1 = cursor1.getFloat(5);
-        if (cursor2.moveToNext())
-            val1 = cursor2.getFloat(5);
-        if (cursor3.moveToNext())
-            val1 = cursor3.getFloat(5);
-        if (cursor4.moveToNext())
-            val1 = cursor4.getFloat(5);
-        if (cursor5.moveToNext())
-            val1 = cursor5.getFloat(5);
-
-        cursor1.close();
-        cursor2.close();
-        cursor3.close();
-        cursor4.close();
-        cursor5.close();
-
-        dbHelper.close();
-    }
-
-
-    public void getSmoke() {
-        SmokeDataBaseHelper dbHelper = new SmokeDataBaseHelper(this);
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-
-        Cursor cursor = db.rawQuery("SELECT * FROM smoking_area", null);
-
-        cursor.close();
-        dbHelper.close();
-    }
 }
