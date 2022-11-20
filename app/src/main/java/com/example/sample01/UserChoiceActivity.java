@@ -18,6 +18,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
@@ -58,7 +59,6 @@ public class UserChoiceActivity extends AppCompatActivity {
     public Spinner MiddleSpinner;
     public Spinner SmallSpinner;
 
-    int check = 0;
 
     //행정구역 중심좌표 담을 전역변수
     double x = 37.5642135;
@@ -173,8 +173,6 @@ public class UserChoiceActivity extends AppCompatActivity {
         BigSpinner.setAdapter(adapter1);
 
         BigSpinner.setSelection(0,false);
-
-
         BigSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -267,7 +265,7 @@ public class UserChoiceActivity extends AppCompatActivity {
                 y = (double) y_coordinate.get(i);
                 MapPoint wantPoint = MapPoint.mapPointWithGeoCoord(x,y);
                 mapView.setMapCenterPoint(wantPoint,true);
-                mapView.setZoomLevel(2,true);
+                mapView.setZoomLevel(3,true);
             }
 
             @Override
@@ -276,10 +274,6 @@ public class UserChoiceActivity extends AppCompatActivity {
             }
         });
 
-
     }
-
-
-
 }
 

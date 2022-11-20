@@ -244,8 +244,8 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
         //마커 여러개 띄우기
         ArrayList<MapPOIItem> markerArr = new ArrayList<MapPOIItem>();
-
-        for(int i=0;i<10;i++){
+        int n = smokingMarkerX.size();
+        for(int i=0;i<n;i++){
             MapPoint mapPoints = MapPoint.mapPointWithGeoCoord((double)smokingMarkerX.get(i), (double)smokingMarkerY.get(i));
             markers.setItemName("Default Marker");
             markers.setTag(0);
@@ -338,10 +338,9 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
         while (getLocation.moveToNext()) {
             adapter.addItemToList(getLocation.getString(1), getLocation.getString(2),getLocation.getDouble(3),getLocation.getDouble(4));
-            if(cnt==10)break;
+
             smokingMarkerX.add(getLocation.getDouble(3));
             smokingMarkerY.add(getLocation.getDouble(4));
-            cnt++;
 
         }
 
