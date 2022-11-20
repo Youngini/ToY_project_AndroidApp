@@ -307,8 +307,9 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         Intent intent = new Intent(this, UserChoiceActivity.class);
         startActivity(intent);
         onDestroy(); // 맵 뷰 2개 못띄워서
+        //onStop();
         //밑에 깔려있는 액티비티 삭제
-        finish();
+        //finish();
     }
 
 
@@ -378,6 +379,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         super.onDestroy();
         mapViewContainer.removeAllViews();
     }
+
 
     @Override
     public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters) {

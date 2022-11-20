@@ -207,6 +207,8 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String big;
         String cmp = "시도 데이터";
+
+        bigList.add("시도");
         Cursor bigCursor = db.rawQuery("SELECT * FROM Korea_GPS",null);
 
         while(bigCursor.moveToNext()){
@@ -225,8 +227,14 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
         BigSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                //Toast.makeText(UserChoiceActivity.this, bigList.get(i).toString() , Toast.LENGTH_LONG).show();
-                InitializeMiddle(bigList.get(i).toString());
+
+                if(i!=0){
+                    MiddleSpinner.setAdapter(null);
+                    SmallSpinner.setAdapter(null);
+                    Toast.makeText(UserChoiceActivity.this, bigList.get(i).toString() , Toast.LENGTH_LONG).show();
+                    InitializeMiddle(bigList.get(i).toString());
+                }
+
             }
 
             @Override
@@ -246,6 +254,8 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
         String cmp = "시군구 데이터";
         Cursor middleCursor = db.rawQuery("SELECT * FROM Korea_GPS WHERE 시도 =" + "'"+ big +"'",null);
 
+        middleList.add("시군구");
+
         while(middleCursor.moveToNext()){
             middle = middleCursor.getString(1);
             if(!middle.equals(cmp)){
@@ -264,8 +274,13 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
         MiddleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                //Toast.makeText(UserChoiceActivity.this, middleList.get(i).toString() , Toast.LENGTH_LONG).show();
-                InitializeSmall(middleList.get(i).toString());
+
+                if(i!=0){
+                    SmallSpinner.setAdapter(null);
+                    Toast.makeText(UserChoiceActivity.this, middleList.get(i).toString() , Toast.LENGTH_LONG).show();
+                    InitializeSmall(middleList.get(i).toString());
+                }
+
             }
 
 
@@ -290,6 +305,8 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
         double y_long;
         Cursor smallCursor = db.rawQuery("SELECT * FROM Korea_GPS WHERE 시군구 =" + "'"+ middle +"'",null);
 
+        smallList.add("읍면동");
+
         while(smallCursor.moveToNext()){
             small = smallCursor.getString(2);
             smallList.add(small);
@@ -312,15 +329,18 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 Toast.makeText(UserChoiceActivity.this, "( "+x_coordinate.get(i).toString()+", "+y_coordinate.get(i).toString()+")" , Toast.LENGTH_LONG).show();
-                x = (double) x_coordinate.get(i);
-                y = (double) y_coordinate.get(i);
-                MapPoint wantPoint = MapPoint.mapPointWithGeoCoord(x,y);
-                mapView.setMapCenterPoint(wantPoint,true);
-                mapView.setZoomLevel(3,true);
+                if(i!=0){
+                    x = (double) x_coordinate.get(i);
+                    y = (double) y_coordinate.get(i);
+                    MapPoint wantPoint = MapPoint.mapPointWithGeoCoord(x,y);
+                    mapView.setMapCenterPoint(wantPoint,true);
+                    mapView.setZoomLevel(3,true);
 
-                getNoSmokingData();
-                markNoSmoking();
-                markSmoking();
+                    getNoSmokingData();
+                    markNoSmoking();
+                    markSmoking();
+                }
+
             }
 
             @Override
