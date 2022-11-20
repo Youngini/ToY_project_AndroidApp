@@ -292,7 +292,7 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
                 if(i!=0){
                     SmallSpinner.setAdapter(null);
                     Toast.makeText(UserChoiceActivity.this, middleList.get(i).toString() , Toast.LENGTH_LONG).show();
-                    InitializeSmall(middleList.get(i).toString());
+                    InitializeSmall(middleList.get(i).toString(),big);
                 }
 
             }
@@ -307,7 +307,7 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
 
     }
 
-    public void InitializeSmall(String middle){
+    public void InitializeSmall(String middle,String big){
         smallList = new ArrayList<>();
         x_coordinate = new ArrayList<>();
         y_coordinate = new ArrayList<>();
@@ -317,7 +317,7 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
         String small;
         double x_lat;
         double y_long;
-        Cursor smallCursor = db.rawQuery("SELECT * FROM Korea_GPS WHERE 시군구 =" + "'"+ middle +"'",null);
+        Cursor smallCursor = db.rawQuery("SELECT * FROM Korea_GPS WHERE 시군구 =" + "'"+ middle +"' AND 시도 =" + "'"+ big +"'",null);
 
         smallList.add("읍면동");
 
@@ -478,6 +478,7 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
                 ChoiceData choiceData = new ChoiceData(address,selectX,selectY,choiceReason);
                 dbHelper.addChoice(choiceData);
                 reason.setText("");
+                Toast.makeText(UserChoiceActivity.this,"접수되었습니다.", Toast.LENGTH_LONG).show();
                 dialogInterface.dismiss();
             }
         });
