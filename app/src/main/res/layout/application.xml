@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp" >
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="15dp"
+        android:textSize="30sp"
+        android:text="    흡연 구역 신청" />
+
+    <TextView
+        android:id="@+id/applicationAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:layout_below="@+id/title"
+        android:text="신청 구역"
+        android:textSize="20sp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        />
+
+    <TextView
+        android:id="@+id/edittextAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:layout_marginBottom="10dp"
+        android:layout_below="@+id/applicationAddress"
+        android:hint = "신청 주소"
+        android:textSize="20sp"
+        >
+
+    </TextView>
+
+    <TextView
+        android:id="@+id/reason"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:text="신청 사유"
+        android:textSize="20sp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_below="@+id/edittextAddress" />
+
+    <EditText
+        android:id="@+id/edittextreason"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:layout_marginBottom="10dp"
+        android:layout_below="@+id/reason"
+        android:maxLength="200"
+        android:hint = "사유는 200자 이내로 적어주세요."/>
+
+</RelativeLayout>

@@ -249,13 +249,12 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         int n = smokingMarkerX.size();
         for(int i=0;i<n;i++){
             MapPoint mapPoints = MapPoint.mapPointWithGeoCoord((double)smokingMarkerX.get(i), (double)smokingMarkerY.get(i));
-            markers.setItemName("Default Marker");
+            markers.setItemName((String)somkingMarkerName.get(i)); // 장소 이름 띄우기
             markers.setTag(0);
             markers.setMapPoint(mapPoints);
             markers.setMarkerType(MapPOIItem.MarkerType.RedPin); // 기본으로 제공하는 BluePin 마커 모양.
             mapView.addPOIItem(markers);
         }
-
 
         // gps 버튼 클릭 이벤트
         final ImageButton currentlocation = (ImageButton) findViewById(R.id.currentlocation);
