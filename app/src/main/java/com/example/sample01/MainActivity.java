@@ -287,7 +287,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                     delay = 0;
                 }
 
-
             }
         });
 
