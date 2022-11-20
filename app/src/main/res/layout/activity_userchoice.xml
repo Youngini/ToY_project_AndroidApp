@@ -22,15 +22,15 @@
         tools:ignore="MissingConstraints">
         <Spinner
             android:id="@+id/big_spinner"
-            android:layout_width="130dp"
+            android:layout_width="126dp"
             android:layout_height="wrap_content" />
         <Spinner
             android:id="@+id/middle_spinner"
-            android:layout_width="130dp"
+            android:layout_width="126dp"
             android:layout_height="wrap_content" />
         <Spinner
             android:id="@+id/small_spinner"
-            android:layout_width="130dp"
+            android:layout_width="126dp"
             android:layout_height="wrap_content" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 

@@ -31,6 +31,10 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.example.sample01.DataBase.KoreaGPSDataBaseHelper;
+import com.example.sample01.DataBase.NoSmokeDataBaseHelper;
+import com.example.sample01.DataBase.NoSmokingData;
+import com.example.sample01.DataBase.SmokeDataBaseHelper;
+import com.example.sample01.DataBase.SmokingData;
 
 import java.util.ArrayList;
 
@@ -40,6 +44,14 @@ public class UserChoiceActivity extends AppCompatActivity {
     ArrayList smallList;
     ArrayList x_coordinate;
     ArrayList y_coordinate;
+
+    ArrayList nosmokingX;
+    ArrayList nosmokingY;
+    ArrayList nosmokingArea;
+
+    ArrayList smokingX;
+    ArrayList smokingY;
+
 
     LinearLayoutCompat Content;
     public Spinner BigSpinner;
@@ -91,8 +103,53 @@ public class UserChoiceActivity extends AppCompatActivity {
         MapPoint wantPoint = MapPoint.mapPointWithGeoCoord(x,y);
         mapView.setMapCenterPoint(wantPoint,true);
 
+        getNoSmokingData();
+        getSmokingData();
 
 
+    }
+
+    public void getSmokingData(){
+        smokingX = new ArrayList<>();
+        smokingY = new ArrayList<>();
+        double x;
+        double y;
+
+        SmokeDataBaseHelper dataBaseHelper = new SmokeDataBaseHelper(this);
+        SQLiteDatabase db = dataBaseHelper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM smoking_area",null);
+
+        while(cursor.moveToNext()) {
+            x = cursor.getDouble(3);
+            y = cursor.getDouble(4);
+            nosmokingX.add(x);
+            nosmokingY.add(y);
+        }
+
+    }
+
+    public void getNoSmokingData(){
+        nosmokingX = new ArrayList<>();
+        nosmokingY = new ArrayList<>();
+        nosmokingArea = new ArrayList<>();
+        double x;
+        double y;
+        double area;
+
+        NoSmokeDataBaseHelper dataBaseHelper = new NoSmokeDataBaseHelper(this);
+        SQLiteDatabase db = dataBaseHelper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM noSmoking_area",null);
+
+        while(cursor.moveToNext()) {
+            x = cursor.getDouble(3);
+            y = cursor.getDouble(4);
+            area = cursor.getDouble(2);
+            nosmokingX.add(x);
+            nosmokingY.add(y);
+            nosmokingArea.add(area);
+        }
     }
 
     public void InitializeBig(){
