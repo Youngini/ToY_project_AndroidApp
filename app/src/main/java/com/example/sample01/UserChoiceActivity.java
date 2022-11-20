@@ -43,6 +43,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.example.sample01.DataBase.Choice;
+import com.example.sample01.DataBase.ChoiceData;
+import com.example.sample01.DataBase.ChoiceDataBaseHelper;
 import com.example.sample01.DataBase.KoreaGPSDataBaseHelper;
 import com.example.sample01.DataBase.NoSmokeDataBaseHelper;
 import com.example.sample01.DataBase.NoSmokingData;
@@ -462,14 +465,19 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
         View view = inflater.inflate(R.layout.application,null);
         newsmokingArea.setView(view);
 
-        final TextView Address = (TextView) view.findViewById(R.id.edittextAddress);
-        final EditText reason = (EditText) view.findViewById(R.id.edittextreason);
+        TextView Address = (TextView) view.findViewById(R.id.edittextAddress);
+        EditText reason = (EditText) view.findViewById(R.id.edittextreason);
 
         Address.setText(address);
         // 신청 버튼
         newsmokingArea.setPositiveButton("신청", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                ChoiceDataBaseHelper dbHelper = new ChoiceDataBaseHelper(context);
+                String choiceReason = reason.getText().toString();
+                ChoiceData choiceData = new ChoiceData(address,selectX,selectY,choiceReason);
+                dbHelper.addChoice(choiceData);
+                reason.setText("");
                 dialogInterface.dismiss();
             }
         });

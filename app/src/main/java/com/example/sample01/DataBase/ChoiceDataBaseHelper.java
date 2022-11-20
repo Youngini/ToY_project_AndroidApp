@@ -1,8 +1,10 @@
 package com.example.sample01.DataBase;
 
+import static com.example.sample01.DataBase.Choice.ChoiceEntry.*;
 import static com.example.sample01.DataBase.Choice.ChoiceEntry.CREATE_TABLE;
 import static com.example.sample01.DataBase.Choice.ChoiceEntry.DELETE_TABLE;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -35,5 +37,19 @@ public class ChoiceDataBaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL(DELETE_TABLE);
         onCreate(sqLiteDatabase);
+    }
+
+    public void addChoice(ChoiceData choiceData){
+        ContentValues values = new ContentValues();
+        values.put(ADDLESS, choiceData.getAddress());
+        values.put(LATITUDE,choiceData.getLatitude());
+        values.put(LONGITUDE,choiceData.getLongitude());
+        values.put(REASON,choiceData.getReason());
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.insert(TABLE_NAME,null,values);
+        db.close();
+
     }
 }
