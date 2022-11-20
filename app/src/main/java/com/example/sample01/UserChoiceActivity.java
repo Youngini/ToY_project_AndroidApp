@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
@@ -159,8 +160,6 @@ public class UserChoiceActivity extends AppCompatActivity {
 
             }
         });
-
-
     }
 
     public void InitializeSmall(String middle){
@@ -199,7 +198,7 @@ public class UserChoiceActivity extends AppCompatActivity {
                 y = (double) y_coordinate.get(i);
                 MapPoint wantPoint = MapPoint.mapPointWithGeoCoord(x,y);
                 mapView.setMapCenterPoint(wantPoint,true);
-                mapView.setZoomLevel(2,true);
+                mapView.setZoomLevel(3,true);
             }
 
             @Override
@@ -208,8 +207,6 @@ public class UserChoiceActivity extends AppCompatActivity {
             }
         });
 
-
     }
-
 }
 
