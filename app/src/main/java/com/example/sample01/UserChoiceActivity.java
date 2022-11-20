@@ -43,7 +43,7 @@ import com.example.sample01.DataBase.SmokingData;
 
 import java.util.ArrayList;
 
-public class UserChoiceActivity extends AppCompatActivity {
+public class UserChoiceActivity extends AppCompatActivity implements MapView.MapViewEventListener, MapView.POIItemEventListener, View.OnClickListener, MapView.CurrentLocationEventListener {
     ArrayList bigList;
     ArrayList middleList;
     ArrayList smallList;
@@ -80,6 +80,11 @@ public class UserChoiceActivity extends AppCompatActivity {
     MapPOIItem s_markers = new MapPOIItem();
     MapPOIItem n_markers = new MapPOIItem();
 
+    // 흡연 구역 설치 장소
+    MapPOIItem selectPoint = new MapPOIItem();
+    double selectX; // 마커 찍은 위도
+    double selectY; // 마커 찍은 경도
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savdeInstanceState) {
@@ -108,6 +113,11 @@ public class UserChoiceActivity extends AppCompatActivity {
         mapViewContainer.addView(mapView);
         MapPoint wantPoint = MapPoint.mapPointWithGeoCoord(x,y);
         mapView.setMapCenterPoint(wantPoint,true);
+
+        // 지도 클릭 시 마커
+        mapView.setMapViewEventListener(this);
+        mapView.setPOIItemEventListener(this);
+
 
         getNoSmokingData();
         getSmokingData();
@@ -141,20 +151,9 @@ public class UserChoiceActivity extends AppCompatActivity {
             if(radius <= 100){
                 radius = 100;
             }
-            MapCircle n_circle = new MapCircle(n_mapPoints,radius,Color.argb(128, 255, 0, 0),Color.argb(128, 0, 255, 0));
+            MapCircle n_circle = new MapCircle(n_mapPoints,radius,Color.argb(0, 0, 0, 0),Color.argb(90, 255, 0, 0));
             mapView.addCircle(n_circle);
 
-//            double no_x = (double)nosmokingX.get(i); // 위도
-//            double no_y = (double)nosmokingY.get(i); // 경도
-//            int radius = (int) Math.sqrt((double)nosmokingArea.get(i)); // 반지름
-//
-//            MapPoint circlePoint = MapPoint.mapPointWithGeoCoord(no_x,no_y);
-//            MapCircle circle = new MapCircle(circlePoint,
-//                    radius,
-//                    Color.argb(128, 255, 0, 0),Color.argb(128, 255, 255, 0));
-//            mapView.addCircle(circle);
-
-//            Log.i(LOG_TAG,"lagitude = "+no_x+" longitude = "+no_y+" area = "+radius);
         }
 
 //        //흡연 구역 표시
@@ -343,6 +342,108 @@ public class UserChoiceActivity extends AppCompatActivity {
         onDestroy(); // 맵 뷰 2개 못띄워서
         //밑에 깔려있는 액티비티 삭제
         //finish();
+    }
+
+    @Override
+    public void onClick(View view) {
+
+    }
+
+    @Override
+    public void onCurrentLocationUpdate(MapView mapView, MapPoint mapPoint, float v) {
+
+    }
+
+    @Override
+    public void onCurrentLocationDeviceHeadingUpdate(MapView mapView, float v) {
+
+    }
+
+    @Override
+    public void onCurrentLocationUpdateFailed(MapView mapView) {
+
+    }
+
+    @Override
+    public void onCurrentLocationUpdateCancelled(MapView mapView) {
+
+    }
+
+    @Override
+    public void onMapViewInitialized(MapView mapView) {
+
+    }
+
+    @Override
+    public void onMapViewCenterPointMoved(MapView mapView, MapPoint mapPoint) {
+
+    }
+
+    @Override
+    public void onMapViewZoomLevelChanged(MapView mapView, int i) {
+
+    }
+
+    // 지도에 한번 탭 하면 핑 찍기
+    @Override
+    public void onMapViewSingleTapped(MapView mapView, MapPoint mapPoint) {
+        mapView.removePOIItem(selectPoint);
+        selectPoint.setItemName("흡연 구역 설치 희망 구역");
+        selectPoint.setTag(0);
+        selectPoint.setMapPoint(mapPoint);
+        selectPoint.setMarkerType(MapPOIItem.MarkerType.RedPin); // 기본으로 제공하는 BluePin 마커 모양.
+        selectPoint.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
+
+        selectX = mapPoint.getMapPointGeoCoord().latitude;
+        selectY = mapPoint.getMapPointGeoCoord().longitude;
+
+        mapView.addPOIItem(selectPoint);
+    }
+
+    @Override
+    public void onMapViewDoubleTapped(MapView mapView, MapPoint mapPoint) {
+
+    }
+
+    @Override
+    public void onMapViewLongPressed(MapView mapView, MapPoint mapPoint) {
+
+    }
+
+    @Override
+    public void onMapViewDragStarted(MapView mapView, MapPoint mapPoint) {
+
+    }
+
+    @Override
+    public void onMapViewDragEnded(MapView mapView, MapPoint mapPoint) {
+
+    }
+
+    @Override
+    public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
+
+    }
+
+    // 마커 선택하면 띄우기
+    @Override
+    public void onPOIItemSelected(MapView mapView, MapPOIItem mapPOIItem) {
+
+    }
+
+    @Override
+    public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem) {
+
+    }
+
+    @Override
+    public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
+
+    }
+
+    @Override
+    public void onDraggablePOIItemMoved(MapView mapView, MapPOIItem mapPOIItem, MapPoint mapPoint) {
+
     }
 }
 

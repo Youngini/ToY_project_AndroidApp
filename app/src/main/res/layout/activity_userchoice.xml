@@ -15,7 +15,7 @@
         android:layout_marginTop="30dp">
 
     </RelativeLayout>
-    <!--            android:onClick="previousPage"-->
+
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/content"
         android:layout_width="match_parent"
