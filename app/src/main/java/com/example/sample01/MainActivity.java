@@ -307,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         startActivity(intent);
         onDestroy(); // 맵 뷰 2개 못띄워서
         //밑에 깔려있는 액티비티 삭제
-        //finish();
+        finish();
     }
 
 
