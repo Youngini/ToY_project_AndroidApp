@@ -87,6 +87,9 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     double x = 35.88807390081719;
     double y = 128.61130207129662;
 
+    public ListViewAdapter listViewAdapter;
+    public ListView listview;
+
     ArrayList<SmokingData> smokingDataList;
     ArrayList smokingMarkerX;
     ArrayList smokingMarkerY;
@@ -102,6 +105,24 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        //슬라이딩드로어 부분 밑줄저거는 호환성 문제라는데 신경안써도 된디유
+        findViewById(R.id.handle).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SlidingDrawer slidingDrawer = (SlidingDrawer) findViewById(R.id.slidingdrawer);
+                slidingDrawer.animateClose();
+            }
+        });
+
+        //슬라이딩 드로어 리스트뷰
+        this.InitializeData();
+        listview = (ListView) findViewById(R.id.smokingListview);
+        listViewAdapter = new ListViewAdapter(this, smokingDataList);
+        listview.setAdapter(listViewAdapter);
+
+
 
         // 지도 띄우기
         mapView = new MapView(this);
@@ -121,12 +142,9 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
         // 구글 장소 검색 자동 완성
         String Apikey = "AIzaSyBa8koUZ6pzntQGN0AaL884n-llNZZym8U";
-
         if(!Places.isInitialized()){
             Places.initialize(getApplicationContext(),Apikey);
-
         }
-
         placesClient = Places.createClient(this);
 
         final AutocompleteSupportFragment autocompleteSupportFragment =
@@ -137,14 +155,15 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         autocompleteSupportFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onError(@NonNull Status status) {
-
             }
-
             @Override
             public void onPlaceSelected(@NonNull Place place) {
                 final LatLng latLng = place.getLatLng();
 
                 Log.i(TAG, "onPlaceSelected : "+latLng.latitude+"\n"+latLng.longitude);
+                x = latLng.latitude;
+                y = latLng.longitude;
+                updateList();
 
                 MapPoint search = MapPoint.mapPointWithGeoCoord(latLng.latitude,latLng.longitude);
                 mapView.setMapCenterPoint(search,true);
@@ -163,8 +182,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
                     markers.setMapPoint(mapPoints);
                     markers.setMarkerType(MapPOIItem.MarkerType.RedPin);
-                    //mapView.addPOIItem(markers);
-                    //markerArr.add(markers);
                     mapView.addPOIItem(markers);
                 }
 
@@ -200,24 +217,10 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                     gpsLocationListener);
         }
 
-        //슬라이딩드로어 부분 밑줄저거는 호환성 문제라는데 신경안써도 된디유
-        findViewById(R.id.handle).setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                SlidingDrawer slidingDrawer = (SlidingDrawer) findViewById(R.id.slidingdrawer);
-                slidingDrawer.animateClose();
-            }
-        });
 
 
-        //리스트뷰
-        this.InitializeData();
 
-        ListView listview = (ListView) findViewById(R.id.smokingListview);
-        final ListViewAdapter listViewAdapter = new ListViewAdapter(this, smokingDataList);
 
-        listview.setAdapter(listViewAdapter);
 
         //경로찾기 연결
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -244,7 +247,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         });
 
         //마커 여러개 띄우기
-        ArrayList<MapPOIItem> markerArr = new ArrayList<MapPOIItem>();
         int n = smokingMarkerX.size();
         for(int i=0;i<n;i++){
             MapPoint mapPoints = MapPoint.mapPointWithGeoCoord((double)smokingMarkerX.get(i), (double)smokingMarkerY.get(i));
@@ -253,31 +255,27 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
             markers.setMapPoint(mapPoints);
             markers.setMarkerType(MapPOIItem.MarkerType.RedPin); // 기본으로 제공하는 BluePin 마커 모양.
             mapView.addPOIItem(markers);
-            //mapView.addPOIItem(markers);
-            //markerArr.add(markers);
         }
-        //mapView.addPOIItems(markerArr.toArray(new MapPOIItem[markerArr.size()]));
-        //mapView.addPOIItems(markerArr);
+
 
         // gps 버튼 클릭 이벤트
         final ImageButton currentlocation = (ImageButton) findViewById(R.id.currentlocation);
         currentlocation.bringToFront();
         // 버튼 클릭 시
         currentlocation.setOnClickListener(new View.OnClickListener() {
-
             long delay = 0;
-
             @Override
             public void onClick(View view) {
                 // 한 번 클릭했을 때
-                if (System.currentTimeMillis() > delay) {
 
+                if (System.currentTimeMillis() > delay) {
                     delay = System.currentTimeMillis() + 200;
                     // 현재위치 받아오기
                     MapPoint current = MapPoint.mapPointWithGeoCoord(x,y);
                     mapView.setMapCenterPoint(current,true);
                     mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving); // 현위치 표시
                     mapView.setZoomLevel(2,true);
+                    updateList();
                     return;
                 }
 
@@ -287,15 +285,20 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                     mapView.setZoomLevel(2,true);
                     delay = 0;
                 }
-
-
             }
         });
+
 
         // 검색창
         final LinearLayout search_content = (LinearLayout) findViewById(R.id.search_content);
         search_content.bringToFront();
 
+    }
+
+    public void updateList(){
+        InitializeData();
+        listViewAdapter = new ListViewAdapter(this ,smokingDataList);
+        listview.setAdapter(listViewAdapter);
     }
 
 
@@ -316,6 +319,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
             y = location.getLongitude(); // 위도
             x = location.getLatitude(); // 경도
 
+
         } public void onStatusChanged(String provider, int status, Bundle extras) {
 
         } public void onProviderEnabled(String provider) {
@@ -326,9 +330,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     };
 
     public void InitializeData() {
-        int cnt=0;
-
-        double distance = 0.0;
+        double Distance = 0.0;
         smokingDataList = new ArrayList<SmokingData>();
         smokingMarkerX = new ArrayList<>();
         smokingMarkerY = new ArrayList<>();
@@ -336,20 +338,39 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         SmokeDataBaseHelper dbHelper = new SmokeDataBaseHelper(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor getLocation = db.rawQuery("SELECT * FROM smoking_area ORDER BY (("+x+"-위도)*("+x+"-위도)) + (("+y+"-경도)*("+y+"-경도)) ASC",null);
-
+        Cursor getLocation = null;
+        getLocation = db.rawQuery("SELECT * FROM smoking_area ORDER BY (("+x+"-위도)*("+x+"-위도)) + (("+y+"-경도)*("+y+"-경도)) ASC",null);
         ListViewAdapter adapter = new ListViewAdapter(this, smokingDataList);
 
 
         while (getLocation.moveToNext()) {
-            adapter.addItemToList(getLocation.getString(1), getLocation.getString(2),getLocation.getDouble(3),getLocation.getDouble(4));
             somkingMarkerName.add(getLocation.getString(1));
             smokingMarkerX.add(getLocation.getDouble(3));
             smokingMarkerY.add(getLocation.getDouble(4));
-            distance = Math.sqrt((x-getLocation.getDouble(3))*(x-getLocation.getDouble(3)) + (y-getLocation.getDouble(4))*(y-getLocation.getDouble(4)));
-
+            Distance = distance(x,y,getLocation.getDouble(3),getLocation.getDouble(4));
+            adapter.addItemToList(getLocation.getString(1), getLocation.getString(2),getLocation.getDouble(3),getLocation.getDouble(4),Distance);
         }
 
+        getLocation.close();
+        dbHelper.close();
+
+    }
+    //좌표로 실제거리 구하기
+    private static double distance(double lat1, double lon1, double lat2, double lon2){
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1))* Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1))*Math.cos(deg2rad(lat2))*Math.cos(deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60*1.1515*1609.344;
+
+        return dist;
+    }
+
+    private static double deg2rad(double deg){
+        return (deg * Math.PI/180.0);
+    }
+    private static double rad2deg(double rad){
+        return (rad * 180 / Math.PI);
     }
 
     @Override
@@ -366,24 +387,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     }
 
 
-    //현재위치랑 가까운 점 반환
-    private String nearLocation(double latitude, double longitude){
-        double SIN_LATITUDE = Math.sin(Math.toRadians(x));
-        double COS_LATITUDE = Math.cos(Math.toRadians(x));
-        double SIN_LONGITUDE = Math.sin(Math.toRadians(y));
-        double COS_LONGITUDE = Math.cos(Math.toRadians(y));
-
-        final double sinLat = Math.sin(Math.toRadians(latitude));
-        final double cosLat = Math.cos(Math.toRadians(latitude));
-        final double sinLng = Math.sin(Math.toRadians(longitude));
-        final double cosLng = Math.cos(Math.toRadians(longitude));
-
-        return "(" + cosLat + "*" + COS_LATITUDE
-                + "*(" + COS_LONGITUDE + "*" + cosLng
-                + "+" + SIN_LONGITUDE + "*" + sinLng
-                + ")+" + sinLat + "*" + SIN_LATITUDE
-                + ")";
-    }
 
 
 
@@ -450,7 +453,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
     // gps 활성화 위함
     private void showDialogForLocationServiceSetting() {
-
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("위치 서비스 비활성화");
         builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n" + "위치 설정을 수정하시겠습니까?");
@@ -474,7 +476,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         switch (requestCode) {
             case GPS_ENABLE_REQUEST_CODE:
                 if (checkLocationServicesStatus()) {
@@ -490,7 +491,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
     public boolean checkLocationServicesStatus() {
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
@@ -539,6 +539,4 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
 
     }
-
-
 }

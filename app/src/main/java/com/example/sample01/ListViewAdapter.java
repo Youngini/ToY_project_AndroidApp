@@ -45,20 +45,22 @@ public class ListViewAdapter extends BaseAdapter {
     @Override
     public View getView(int i, View converview, ViewGroup viewGroup) {
         View view = mLayoutInflater.inflate(R.layout.item_list,null);
+        String distance = (int)sample.get(i).getDist() + "m";
 
         TextView Name = (TextView) view.findViewById(R.id.nosmokingName);
         TextView Address = (TextView)view.findViewById(R.id.nosmokingAddress);
-        //TextView dist = (TextView)view.findViewById(R.id.dist);
+        TextView dist = (TextView)view.findViewById(R.id.dist);
         Name.setText(sample.get(i).getName());
         Address.setText(sample.get(i).getAddress());
+        dist.setText(distance);
 
 
         return view;
     }
-    public void addItemToList(String name, String address,double X,double Y){
+    public void addItemToList(String name, String address,double X,double Y,double dist){
         SmokingData smokingData = new SmokingData();
 
-        smokingData.SmokingData(name,address,X,Y);
+        smokingData.SmokingData(name,address,X,Y, dist);
 
         sample.add(smokingData);
 
