@@ -97,7 +97,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     MapPOIItem marker = new MapPOIItem();
     MapPOIItem markers = new MapPOIItem();
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -298,7 +297,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
     }
 
-
     //다음페이지(사용자 신청)로 넘어가는 함수
     public void nextPage(View view){
         Intent intent = new Intent(this, UserChoiceActivity.class);
@@ -307,8 +305,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         //밑에 깔려있는 액티비티 삭제
         //finish();
     }
-
-
 
     final LocationListener gpsLocationListener = new LocationListener() {
         public void onLocationChanged(Location location) {

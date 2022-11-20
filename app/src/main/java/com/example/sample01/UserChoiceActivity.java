@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.LocationManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -20,6 +21,9 @@ import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
+
+import net.daum.mf.map.api.MapCircle;
+import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
@@ -72,6 +76,9 @@ public class UserChoiceActivity extends AppCompatActivity {
     private static final int PERMISSIONS_REQUEST_CODE = 100;
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION};
 
+    // 흡연 구역 표시
+    MapPOIItem s_markers = new MapPOIItem();
+    MapPOIItem n_markers = new MapPOIItem();
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -95,8 +102,7 @@ public class UserChoiceActivity extends AppCompatActivity {
 
         InitializeBig();
 
-
-
+        // 지도 띄우기
         mapView = new MapView(this);
         mapViewContainer = (ViewGroup) findViewById(R.id.map_view2);
         mapViewContainer.addView(mapView);
@@ -105,8 +111,55 @@ public class UserChoiceActivity extends AppCompatActivity {
 
         getNoSmokingData();
         getSmokingData();
+//
+//        double no_x = (double)nosmokingX.get(0); // 위도
+//        double no_y = (double)nosmokingY.get(0); // 경도
+//        int r = (int) Math.sqrt((double)nosmokingArea.get(0)); // 반지름
+//        MapPoint circlePoint = MapPoint.mapPointWithGeoCoord(35.255323,128.9030254);
+//        MapCircle circle2 = new MapCircle(
+//                MapPoint.mapPointWithGeoCoord(35.255323, 128.9030254), // center
+//                1000, // radius
+//                Color.argb(128, 255, 0, 0), // strokeColor
+//                Color.argb(128, 255, 255, 0) // fillColor
+//        );
+//        circle2.setTag(5678);
+//        mapView.addCircle(circle2);
+//        Log.i(LOG_TAG,"lagitude = "+no_x+" longitude = "+no_y+" area = "+r);
 
 
+        // 금연 구역 표시
+        int n = nosmokingArea.size();
+        for(int i=0;i<1000;i++){
+            MapPoint n_mapPoints = MapPoint.mapPointWithGeoCoord((double)nosmokingX.get(i), (double)nosmokingY.get(i));
+            s_markers.setItemName("Default Marker");
+            s_markers.setTag(0);
+            s_markers.setMapPoint(n_mapPoints);
+            s_markers.setMarkerType(MapPOIItem.MarkerType.RedPin); // 기본으로 제공하는 BluePin 마커 모양.
+            mapView.addPOIItem(s_markers);
+
+//            double no_x = (double)nosmokingX.get(i); // 위도
+//            double no_y = (double)nosmokingY.get(i); // 경도
+//            int radius = (int) Math.sqrt((double)nosmokingArea.get(i)); // 반지름
+//
+//            MapPoint circlePoint = MapPoint.mapPointWithGeoCoord(no_x,no_y);
+//            MapCircle circle = new MapCircle(circlePoint,
+//                    radius,
+//                    Color.argb(128, 255, 0, 0),Color.argb(128, 255, 255, 0));
+//            mapView.addCircle(circle);
+
+//            Log.i(LOG_TAG,"lagitude = "+no_x+" longitude = "+no_y+" area = "+radius);
+        }
+
+//        //흡연 구역 표시
+        int s = smokingX.size();
+        for(int i=0;i<s;i++){
+            MapPoint s_mapPoints = MapPoint.mapPointWithGeoCoord((double)smokingX.get(i), (double)smokingY.get(i));
+            s_markers.setItemName("Default Marker");
+            s_markers.setTag(0);
+            s_markers.setMapPoint(s_mapPoints);
+            s_markers.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
+            mapView.addPOIItem(s_markers);
+        }
     }
 
     public void getSmokingData(){
@@ -123,8 +176,8 @@ public class UserChoiceActivity extends AppCompatActivity {
         while(cursor.moveToNext()) {
             x = cursor.getDouble(3);
             y = cursor.getDouble(4);
-            nosmokingX.add(x);
-            nosmokingY.add(y);
+            smokingX.add(x);
+            smokingY.add(y);
         }
 
     }
@@ -143,8 +196,8 @@ public class UserChoiceActivity extends AppCompatActivity {
         Cursor cursor = db.rawQuery("SELECT * FROM noSmoking_area",null);
 
         while(cursor.moveToNext()) {
-            x = cursor.getDouble(3);
-            y = cursor.getDouble(4);
+            x = cursor.getDouble(4);
+            y = cursor.getDouble(5);
             area = cursor.getDouble(2);
             nosmokingX.add(x);
             nosmokingY.add(y);
@@ -274,6 +327,15 @@ public class UserChoiceActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    // 흡연 구역 검색
+    public void previousPage(View view){
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        onDestroy(); // 맵 뷰 2개 못띄워서
+        //밑에 깔려있는 액티비티 삭제
+        //finish();
     }
 }
 
