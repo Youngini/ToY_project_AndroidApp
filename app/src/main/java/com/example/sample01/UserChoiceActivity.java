@@ -131,11 +131,18 @@ public class UserChoiceActivity extends AppCompatActivity {
         int n = nosmokingArea.size();
         for(int i=0;i<1000;i++){
             MapPoint n_mapPoints = MapPoint.mapPointWithGeoCoord((double)nosmokingX.get(i), (double)nosmokingY.get(i));
-            s_markers.setItemName("Default Marker");
-            s_markers.setTag(0);
-            s_markers.setMapPoint(n_mapPoints);
-            s_markers.setMarkerType(MapPOIItem.MarkerType.RedPin); // 기본으로 제공하는 BluePin 마커 모양.
-            mapView.addPOIItem(s_markers);
+//            s_markers.setItemName("Default Marker");
+//            s_markers.setTag(0);
+//            s_markers.setMapPoint(n_mapPoints);
+//            s_markers.setMarkerType(MapPOIItem.MarkerType.RedPin); // 기본으로 제공하는 BluePin 마커 모양.
+//            mapView.addPOIItem(s_markers);
+
+            int radius = (int) Math.sqrt((double)nosmokingArea.get(i)); // 반지름
+            if(radius <= 100){
+                radius = 100;
+            }
+            MapCircle n_circle = new MapCircle(n_mapPoints,radius,Color.argb(128, 255, 0, 0),Color.argb(128, 0, 255, 0));
+            mapView.addCircle(n_circle);
 
 //            double no_x = (double)nosmokingX.get(i); // 위도
 //            double no_y = (double)nosmokingY.get(i); // 경도

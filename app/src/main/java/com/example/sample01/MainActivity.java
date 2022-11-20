@@ -284,6 +284,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                     mapView.setZoomLevel(2,true);
                     delay = 0;
                 }
+
             }
         });
 
