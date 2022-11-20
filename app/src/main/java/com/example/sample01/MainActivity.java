@@ -81,12 +81,10 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     int nCurrentPermission = 0;
     static final int PERMISSIONS_REQUEST = 0x0000001;
     float val1 = 0;
-    float val2 = 0;
 
     //밑에 두개가 현재위치 좌표 저장할 변수(기본값으로 경대 해뒀음!)
     double x = 35.88807390081719;
     double y = 128.61130207129662;
-    Cursor location;
 
     ArrayList<NoSmokingData> noSmokingDataList;
     ArrayList<SmokingData> smokingDataList;
@@ -96,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     // 구글 장소 검색 자동 완성
     PlacesClient placesClient;
     MapPOIItem marker = new MapPOIItem();
+    MapPOIItem markers = new MapPOIItem();
 
 
     @Override
@@ -142,6 +141,16 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
                 mapView.addPOIItem(marker);
 
+                for(int i=0;i<10;i++){
+                    MapPoint mapPoints = MapPoint.mapPointWithGeoCoord((double)smokingMarkerX.get(i), (double)smokingMarkerY.get(i));
+
+                    markers.setMapPoint(mapPoints);
+                    markers.setMarkerType(MapPOIItem.MarkerType.RedPin);
+                    //mapView.addPOIItem(markers);
+                    //markerArr.add(markers);
+                    mapView.addPOIItem(markers);
+                }
+
 
 
             }
@@ -186,9 +195,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         mapView.setMapCenterPoint(current,true);
         mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving); // 현위치 트래킹 모드
 
-        //mapView.setCurrentLocationRadius(100); // 현위치 마커 중심으로 그릴 원의 반경 지정
-        //mapView.setCurrentLocationRadiusStrokeColor(Color.GRAY); // 현위치 마커 중심으로 그릴 원의 선 색상 지정
-        //mapView.setCurrentLocationRadiusFillColor(Color.RED); // 현위치 마커 중심으로 그릴 원의 채우기 색상 지정
 
         if (!checkLocationServicesStatus()) {
             showDialogForLocationServiceSetting();
@@ -242,17 +248,19 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
 
 
-
+        //마커 여러개 띄우기
         ArrayList<MapPOIItem> markerArr = new ArrayList<MapPOIItem>();
-        for(int i=0;i<=10;i++){
-            MapPoint mapPoints = MapPoint.mapPointWithGeoCoord((Double) smokingMarkerX.get(i), (Double) smokingMarkerY.get(i));
-            MapPOIItem markers = new MapPOIItem();
+
+        for(int i=0;i<10;i++){
+            MapPoint mapPoints = MapPoint.mapPointWithGeoCoord((double)smokingMarkerX.get(i), (double)smokingMarkerY.get(i));
             markers.setMapPoint(mapPoints);
-            //markers.setMarkerType(MapPOIItem.MarkerType.BluePin);
+            markers.setMarkerType(MapPOIItem.MarkerType.RedPin);
             //mapView.addPOIItem(markers);
-            markerArr.add(markers);
+            //markerArr.add(markers);
+            mapView.addPOIItem(markers);
         }
-        mapView.addPOIItems(markerArr.toArray(new MapPOIItem[markerArr.size()]));
+        //mapView.addPOIItems(markerArr.toArray(new MapPOIItem[markerArr.size()]));
+        //mapView.addPOIItems(markerArr);
 
 
 
@@ -287,17 +295,14 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                     delay = 0;
                 }
 
-                //mapView.setCurrentLocationRadius(100); // 현위치 마커 중심으로 그릴 원의 반경 지정
-                //mapView.setCurrentLocationRadiusStrokeColor(Color.GRAY); // 현위치 마커 중심으로 그릴 원의 선 색상 지정
-                //mapView.setCurrentLocationRadiusFillColor(Color.TRANSPARENT); // 현위치 마커 중심으로 그릴 원의 채우기 색상 지정
+
             }
         });
 
         // 검색창
         final LinearLayout search_content = (LinearLayout) findViewById(R.id.search_content);
         search_content.bringToFront();
-//        final EditText search_engine =  (EditText) findViewById(R.id.search_engine);
-//        search_engine.bringToFront();
+
     }
 
 
@@ -341,11 +346,11 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
         while (getLocation.moveToNext()) {
             adapter.addItemToList(getLocation.getString(1), getLocation.getString(2),getLocation.getDouble(3),getLocation.getDouble(4));
-            while(cnt<=10){
-                smokingMarkerX.add(getLocation.getDouble(3));
-                smokingMarkerY.add(getLocation.getDouble(4));
-                cnt++;
-            }
+            if(cnt==10)break;
+            smokingMarkerX.add(getLocation.getDouble(3));
+            smokingMarkerY.add(getLocation.getDouble(4));
+            cnt++;
+
         }
 
     }
@@ -360,8 +365,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters) {
         MapPoint.GeoCoordinate mapPointGeo = currentLocation.getMapPointGeoCoord();
         Log.i(LOG_TAG, String.format("MapView OnCurrentLocationUpdate (%f, %f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, accuracyInMeters));
-//        latitude = mapPointGeo.latitude; //현재위치 좌표 전역변수로 저장
-//        longitude = mapPointGeo.latitude;
+
     }
 
 
