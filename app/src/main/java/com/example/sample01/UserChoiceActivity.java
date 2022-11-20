@@ -119,34 +119,19 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
         mapView.setPOIItemEventListener(this);
 
 
-        getNoSmokingData();
+        //getNoSmokingData();
         getSmokingData();
-//
-//        double no_x = (double)nosmokingX.get(0); // 위도
-//        double no_y = (double)nosmokingY.get(0); // 경도
-//        int r = (int) Math.sqrt((double)nosmokingArea.get(0)); // 반지름
-//        MapPoint circlePoint = MapPoint.mapPointWithGeoCoord(35.255323,128.9030254);
-//        MapCircle circle2 = new MapCircle(
-//                MapPoint.mapPointWithGeoCoord(35.255323, 128.9030254), // center
-//                1000, // radius
-//                Color.argb(128, 255, 0, 0), // strokeColor
-//                Color.argb(128, 255, 255, 0) // fillColor
-//        );
-//        circle2.setTag(5678);
-//        mapView.addCircle(circle2);
-//        Log.i(LOG_TAG,"lagitude = "+no_x+" longitude = "+no_y+" area = "+r);
 
 
+
+    }
+
+
+    public void markNoSmoking(){
         // 금연 구역 표시
         int n = nosmokingArea.size();
-        for(int i=0;i<1000;i++){
+        for(int i=0;i<100;i++){
             MapPoint n_mapPoints = MapPoint.mapPointWithGeoCoord((double)nosmokingX.get(i), (double)nosmokingY.get(i));
-//            s_markers.setItemName("Default Marker");
-//            s_markers.setTag(0);
-//            s_markers.setMapPoint(n_mapPoints);
-//            s_markers.setMarkerType(MapPOIItem.MarkerType.RedPin); // 기본으로 제공하는 BluePin 마커 모양.
-//            mapView.addPOIItem(s_markers);
-
             int radius = (int) Math.sqrt((double)nosmokingArea.get(i)); // 반지름
             if(radius <= 100){
                 radius = 100;
@@ -155,8 +140,10 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
             mapView.addCircle(n_circle);
 
         }
+    }
 
-//        //흡연 구역 표시
+    public void markSmoking(){
+        //흡연 구역 표시
         int s = smokingX.size();
         for(int i=0;i<s;i++){
             MapPoint s_mapPoints = MapPoint.mapPointWithGeoCoord((double)smokingX.get(i), (double)smokingY.get(i));
@@ -332,6 +319,8 @@ public class UserChoiceActivity extends AppCompatActivity implements MapView.Map
                 mapView.setZoomLevel(3,true);
 
                 getNoSmokingData();
+                markNoSmoking();
+                markSmoking();
             }
 
             @Override
